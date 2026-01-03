@@ -2,17 +2,14 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 
-// Define the maximum expected time for a complex task like roadmap generation (in ms)
-// We'll use this to pace the progress bar.
-const MAX_EXPECTED_TIME = 18000; // 18 seconds (15s minimum + buffer)
+const MAX_EXPECTED_TIME = 18000; 
 
-// Define messages relevant to career guidance
 const THINKING_MESSAGES = [
-  "Analyzing profile & context",
-  "Synthesizing career options",
-  "Mapping skills to industry demand",
-  "Formulating personalized guidance",
-  "Structuring your roadmap"
+  "Analyzing profile",
+  "Generating options",
+  "Matching skills",
+  "Drafting advice",
+  "Building roadmap"
 ];
 
 export default function TypingIndicator({ isRoadmap = false }) {

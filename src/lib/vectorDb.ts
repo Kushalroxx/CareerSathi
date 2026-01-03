@@ -1,6 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
 
-// Define a type for the search result structure, since we no longer have SDK types
 export type QdrantSearchResult = {
     id: string | number;
     score: number;
@@ -30,14 +29,10 @@ export class VectorDb {
                 'QDRANT_URL and QDRANT_COLLECTION_NAME must be defined in .env'
             );
         }
-
-        // Base URL for the REST API endpoint (e.g., 'http://localhost:6333')
         this.baseUrl = `${qdrantUrl}/collections/${this.collectionName}/points`;
 
-        // Configure headers for all requests
         this.headers = new Headers({
             'Content-Type': 'application/json',
-            // Add API Key header if it exists
             ...(qdrantApiKey && { 'api-key': qdrantApiKey }),
         });
         
@@ -51,7 +46,6 @@ export class VectorDb {
         return VectorDb.instance;
     }
 
-    // --- Save/Upsert Data (POST /collections/{collection_name}/points/upsert) ---
     async saveToVectorDb(
         userId: string,
         vector: number[],
@@ -71,7 +65,7 @@ export class VectorDb {
                     timestamp: new Date().toISOString(),
                 },
             }],
-            wait: true // Wait for the operation to complete
+            wait: true 
         };
 
         try {
@@ -91,8 +85,6 @@ export class VectorDb {
             throw new Error('Failed to save vector data. (Does the collection exist?)');
         }
     }
-
-    // --- Search Data (POST /collections/{collection_name}/points/search) ---
     async getFromVectorDb(
         userId: string,
         queryVector: number[],

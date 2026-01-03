@@ -19,6 +19,7 @@ export default function ChatPage() {
   const id = useParams().id?.[0];
   const [darkMode, setDarkMode] = useState(false);
   const [input, setInput] = useState("");
+  const [oldInput, setOldInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [currentSessionId, setCurrentSessionId] = useState<string|undefined>(id);
   const router = useRouter();
@@ -44,7 +45,7 @@ export default function ChatPage() {
 
     const userMessage: ChatMessage = { role: "user", text: input };
     let sessionId = currentSessionId;
-
+    setOldInput(input);
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsTyping(true);
@@ -68,7 +69,9 @@ export default function ChatPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: userMessage.text, provider: "gemini",chatId: sessionId, history }),
       });
-      
+      if (!res.ok) {
+        setInput(oldInput);
+      }
       const data = await res.json();
       if (data.title) {
         const newTitle = data.title.substring(0, 40) + (data.title.length > 40 ? "..." : "");
@@ -81,7 +84,7 @@ export default function ChatPage() {
       setMessages((prev) => [...prev, botMessage]);
       await saveChatMessage(userId, sessionId, "bot", botReply);
     } catch (err) {
-      console.error(err);
+      setInput(oldInput);
       setMessages((prev) => [...prev, { role: "bot", text: "Sorry, something went wrong." }]);
     } finally {
       setIsTyping(false);
@@ -90,7 +93,7 @@ export default function ChatPage() {
 
   return (
     <div className={`transition-colors duration-500 ${darkMode ? "bg-gradient-to-br from-gray-900 via-gray-800 to-black text-gray-200" : "bg-gradient-to-br from-blue-50 to-purple-50"}`}>
-      <div className="max-w-[82rem] mx-auto flex h-screen">
+      <div className=" ml-10 flex h-screen">
         <Header className="pl-8 lg:pl-0" />
         <ChatSidebar
           darkMode={darkMode}

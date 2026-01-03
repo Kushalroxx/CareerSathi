@@ -6,12 +6,13 @@ import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X, User, LogIn, Users, Sparkles } from 'lucide-react'
 import { useSession, signOut } from 'next-auth/react'
+import Image from 'next/image'
 
 export default function Header({ className }: { className?: string }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const { data: session, status } = useSession()
-  const pathname = usePathname() // get current route
+  const pathname = usePathname()
 
   const handleSignOut = async () => {
     await signOut({ callbackUrl: '/' })
@@ -27,9 +28,9 @@ export default function Header({ className }: { className?: string }) {
   const normalNav = [
     { name: 'Home', href: '/' },
     { name: 'Features', href: '/#features' },
-    { name: 'How It Helps', href: '/how-it-helps' },
-    { name: 'Your Journey', href: '/#how-it-works' },
-    { name: 'About', href: '/#about' },
+    { name: 'How It Helps', href: '/how-it-works' },
+    { name: 'Your Journey', href: '/#how-it-works' }, // This looks like a hash section
+    { name: 'About', href: '/about' },
   ]
 
   const protectedNav = [
@@ -39,8 +40,21 @@ export default function Header({ className }: { className?: string }) {
     { name: 'Career Simulator', href: '/career_simulate' },
   ]
 
-  // Which nav to show
   const displayedNavItems = session ? protectedNav : normalNav
+
+  // --- FIX: SMART ACTIVE CHECKER ---
+  const isActiveLink = (href: string) => {
+    // 1. If it's a hash link (e.g., /#features), don't underline it based on path
+    // (Hash links usually need a ScrollSpy to work, which is complex)
+    if (href.includes('#')) return false;
+
+    // 2. If it's the Home link ('/'), only active if we are exactly at root
+    if (href === '/') return pathname === '/';
+
+    // 3. For other pages, check if the path starts with the href
+    // (e.g. /roadmap/123 should make /roadmap active)
+    return pathname.startsWith(href);
+  }
 
   const linkClasses =
     'text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200 relative group'
@@ -65,19 +79,25 @@ export default function Header({ className }: { className?: string }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 lg:h-20">
           {/* Logo */}
-          <Link href="/" className={`${className} flex items-center space-x-2 group`}>
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-              <Sparkles className="w-6 h-6 text-white" />
-            </div>
-            <span className="text-2xl font-bold font-display text-gradient">CareerSathi</span>
-          </Link>
+         <Link href="/" className={`${className} flex items-center -space-x-1 group`}>
+  <div className="w-9 h-9 relative rounded-lg overflow-hidden group-hover:scale-110 transition-transform duration-300">
+    <Image
+      src="/careerSathi.png"
+      alt="CareerSathi Logo"
+      fill
+      className="object-cover"
+    />
+  </div>
+  <span className="md:text-2xl text-xl font-bold font-display ">CareerSathi</span>
+</Link>
 
           {/* Desktop Nav */}
           <nav className="hidden lg:flex items-center space-x-8">
             {displayedNavItems.map((item) => (
               <Link key={item.name} href={item.href} className={linkClasses}>
                 {item.name}
-                {pathname.includes(item.href) ? (
+                {/* USE THE NEW FUNCTION HERE */}
+                {isActiveLink(item.href) ? (
                   <span className={activeUnderline}></span>
                 ) : (
                   <span className={underline}></span>
@@ -144,7 +164,7 @@ export default function Header({ className }: { className?: string }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="h-screen bg-black/30"
+            className="h-screen bg-black/30 fixed inset-0 z-40"
           >
             <motion.div
               onClick={(e) => e.stopPropagation()}
@@ -152,7 +172,7 @@ export default function Header({ className }: { className?: string }) {
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.1 }}
-              className="lg:hidden bg-white border-t border-gray-200 shadow-lg"
+              className="lg:hidden bg-white border-t border-gray-200 shadow-lg overflow-hidden absolute top-16 left-0 right-0 z-50"
             >
               <div className="px-4 py-6 space-y-4">
                 {displayedNavItems.map((item) => (
@@ -163,11 +183,10 @@ export default function Header({ className }: { className?: string }) {
                     className="block px-4 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg font-medium transition-colors relative"
                   >
                     {item.name}
-                    {pathname.includes(item.href) ? (
-                      <span className={activeUnderline}></span>
-                    ) : (
-                      <span className={underline}></span>
-                    )}
+                    {/* USE THE NEW FUNCTION HERE TOO */}
+                    {isActiveLink(item.href) ? (
+                      <span className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-1 bg-blue-600 rounded-r"></span>
+                    ) : null}
                   </Link>
                 ))}
 

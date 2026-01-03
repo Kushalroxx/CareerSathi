@@ -1,452 +1,428 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { ArrowRight, Brain, Target, Users, Shield, Sparkles, CheckCircle, Star, Quote } from 'lucide-react'
+import { ArrowRight, MessageSquare, Map, CheckCircle2, Zap, CalendarCheck, BookOpen, BarChart3, Lock, ShieldCheck, BrainCircuit, Trash2, MoreHorizontal, LayoutDashboard, Youtube, Trophy, LineChart, RefreshCw, Briefcase, GraduationCap } from 'lucide-react'
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
-import FeatureCard from '@/components/ui/FeatureCard'
-import TestimonialCard from '@/components/ui/TestimonialCard'
-import StatsCounter from '@/components/ui/StatsCounter'
+import Image from 'next/image'
 
-const fadeInUp = {
-  initial: { opacity: 0, y: 60 },
-  animate: { opacity: 1, y: 0 }
+// Smooth Fade In Animation
+const fadeIn = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
 }
 
-const staggerContainer = {
-  animate: {
-    transition: {
-      staggerChildren: 0.1
-    }
-  }
+const stagger = {
+  visible: { transition: { staggerChildren: 0.15 } }
 }
 
 export default function HomePage() {
-  const [isVisible, setIsVisible] = useState(false)
-
-  useEffect(() => {
-    setIsVisible(true)
-  }, [])
-
-  const features = [
-    {
-      icon: Brain,
-      title: "AI-Powered Analysis",
-      description: "Advanced algorithms analyze your skills, interests, and market trends to provide personalized career recommendations.",
-      color: "from-blue-500 to-purple-600"
-    },
-    {
-      icon: Target,
-      title: "Personalized Roadmaps",
-      description: "Get step-by-step career paths tailored to your unique profile and aspirations in the Indian job market.",
-      color: "from-purple-500 to-pink-600"
-    },
-    {
-      icon: Users,
-      title: "Industry Insights",
-      description: "Access real-time data on job market trends, salary expectations, and skill demands across industries.",
-      color: "from-pink-500 to-red-600"
-    },
-    {
-      icon: Sparkles,
-      title: "Skill Gap Analysis",
-      description: "Identify exactly what skills you need to develop to reach your dream career goals.",
-      color: "from-orange-500 to-yellow-600"
-    }
-  ]
-
-  const testimonials = [
-    {
-      name: "Priya Sharma",
-      role: "Software Engineer at TCS",
-      content: "CareerSathi helped me transition from mechanical engineering to software development. The personalized roadmap was incredibly detailed!",
-      rating: 5,
-      avatar: "/api/placeholder/64/64"
-    },
-    {
-      name: "Rahul Gupta",
-      role: "Data Scientist at Flipkart",
-      content: "The AI recommendations were spot-on. I discovered career paths I never knew existed and got the skills needed to land my dream job.",
-      rating: 5,
-      avatar: "/api/placeholder/64/64"
-    },
-    {
-      name: "Ananya Patel",
-      role: "Product Manager at Zomato",
-      content: "As a commerce student, I was confused about tech careers. CareerSathi's guidance helped me become a successful product manager.",
-      rating: 5,
-      avatar: "/api/placeholder/64/64"
-    }
-  ]
-
-  const stats = [
-    { number: 50000, label: "Students Guided", suffix: "+" },
-    { number: 95, label: "Success Rate", suffix: "%" },
-    { number: 200, label: "Career Paths", suffix: "+" },
-    { number: 24, label: "Support Available", suffix: "/7" }
-  ]
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-b to-purple-50 from-indigo-50 text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-900">
       <Header />
       
-      {/* Hero Section */}
-      <section className="relative overflow-hidden pt-20 pb-16 lg:pt-32 lg:pb-24">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 via-purple-600/10 to-pink-600/10"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center"
-          >
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 text-sm font-medium mb-8"
-            >
-              <Sparkles className="w-4 h-4 mr-2" />
-              Powered by Google Cloud AI
+      {/* 1. HERO SECTION */}
+      <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-32 overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 opacity-40">
+            <div className="absolute top-[-10%] right-0 w-[800px] h-[800px] bg-gradient-to-b from-blue-100 to-transparent rounded-full blur-3xl"></div>
+            <div className="absolute bottom-0 left-[-10%] w-[600px] h-[600px] bg-gradient-to-t from-purple-100 to-transparent rounded-full blur-3xl"></div>
+        </div>
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10 text-center">
+          <motion.div initial="hidden" animate="visible" variants={stagger} className="max-w-4xl mx-auto">
+            
+            <motion.div variants={fadeIn} className=" items-center px-4 py-1.5 rounded-full bg-white/30 border border-slate-200 shadow-sm text-sm font-medium text-slate-600 mb-8 flex justify-center max-w-max mx-auto">
+             
+              <span>Powered by</span> <Image src="/logo.png" alt="Zelphine Logo" width={20} height={20} className="rounded-full mx-0.5" /><span> Zelphine </span>
             </motion.div>
             
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold font-display mb-6">
-              <span className="text-gradient">CareerSathi</span>
-              <br />
-              <span className="text-gray-800">Your Trusted Friend in</span>
-              <br />
-              <span className="text-gradient">Shaping Tomorrow's Career</span>
-            </h1>
+            <motion.h1 variants={fadeIn} className="text-5xl md:text-7xl font-bold tracking-tight text-slate-900 mb-6 leading-[1.15]">
+              Don't Just Plan Your Career. <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+                Execute It.
+              </span>
+            </motion.h1>
             
-            <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-              Personalized AI Career & Skills Advisor designed specifically for Indian students. 
-              Navigate your career journey with confidence and precision.
-            </p>
+            <motion.p variants={fadeIn} className="text-xl text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed">
+              Meet your AI Mentor. Chat to define your goals, generate dynamic roadmaps, and receive 
+              <span className="font-bold text-slate-900"> 5 custom tasks every day </span> 
+              to turn ambition into action.
+            </motion.p>
             
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="flex flex-col sm:flex-row gap-4 sm:gap-8 justify-center items-center mb-12"
-            >
-              <Link href="/auth/signup" className="btn-primary group">
-                Get Started Free
-                <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            <motion.div variants={fadeIn} className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Link href="/auth/signin" className="w-full sm:w-auto px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full shadow-lg shadow-blue-200 transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2">
+                Chat with AI Mentor
+                <MessageSquare className="w-5 h-5" />
               </Link>
-              <Link href="/how-it-helps" className="btn-secondary border-blue-300">
-                How It Helps
+              <Link href="/how-it-works" className="w-full sm:w-auto px-8 py-4 bg-white border border-slate-200 hover:border-blue-200 text-slate-700 font-medium rounded-full transition-all hover:shadow-md flex items-center justify-center">
+                View Sample Roadmap
               </Link>
             </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* 2. [NEW] FEATURES GRID */}
+      <section id='features' className="py-24 ">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+              Everything You Need to Scale
+            </h2>
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+              We replaced generic advice with engineering tools. Here is your career stack.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             
-            {/* Trust Signals */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-              className="flex flex-wrap justify-center items-center gap-8 text-sm text-gray-500"
-            >
-              <div className="flex items-center">
-                <Shield className="w-4 h-4 mr-2 text-green-500" />
-                Data Privacy Protected
-              </div>
-              <div className="flex items-center">
-                <CheckCircle className="w-4 h-4 mr-2 text-blue-500" />
-                Built with Google Cloud
-              </div>
-              <div className="flex items-center">
-                <Users className="w-4 h-4 mr-2 text-purple-500" />
-                For Indian Students
-              </div>
+            {/* Feature 1 */}
+            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all">
+                <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center mb-4">
+                    <Youtube className="w-5 h-5" />
+                </div>
+                <h3 className="font-bold text-slate-900 text-lg mb-2">Curated Resources</h3>
+                <p className="text-sm text-slate-600 leading-relaxed">
+                    Don't waste time searching. Every task comes with AI-selected YouTube videos and documentation links tailored to the topic.
+                </p>
             </motion.div>
-          </motion.div>
-        </div>
-        
-        {/* Floating Elements */}
-        <div className="absolute top-20 left-10 w-20 h-20 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full opacity-20 animate-bounce-slow"></div>
-        <div className="absolute top-40 right-10 w-16 h-16 bg-gradient-to-r from-pink-400 to-red-500 rounded-full opacity-20 animate-pulse-slow"></div>
-        <div className="absolute bottom-20 left-1/4 w-12 h-12 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full opacity-20 animate-bounce-slow"></div>
-      </section>
 
-      {/* About Section */}
-      <section id="about" className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 60 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl md:text-5xl font-bold font-display mb-6 text-gradient">
-              About CareerSathi
-            </h2>
-            <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
-              CareerSathi is India's first AI-powered career advisor designed specifically for students and professionals. 
-              We understand the unique challenges of the Indian education system, family expectations, and job market dynamics. 
-              Our mission is to democratize career guidance and make personalized mentorship accessible to every Indian student.
-            </p>
-          </motion.div>
-          
-          <motion.div
-            variants={staggerContainer}
-            initial="initial"
-            whileInView="animate"
-            viewport={{ once: true }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-8"
-          >
-            {stats.map((stat, index) => (
-              <StatsCounter key={index} {...stat} />
-            ))}
-          </motion.div>
-        </div>
-      </section>
+            {/* Feature 2 */}
+            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all">
+                <div className="w-10 h-10 bg-purple-50 text-purple-600 rounded-lg flex items-center justify-center mb-4">
+                    <BrainCircuit className="w-5 h-5" />
+                </div>
+                <h3 className="font-bold text-slate-900 text-lg mb-2">Context-Aware AI</h3>
+                <p className="text-sm text-slate-600 leading-relaxed">
+                    The mentor remembers your past chats, your current roadmap progress, and your difficulty settings.
+                </p>
+            </motion.div>
 
-      {/* Features Section */}
-      <section id="features" className="py-20 bg-gradient-to-br from-blue-50 to-purple-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 60 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl md:text-5xl font-bold font-display mb-6 text-gradient">
-              Why Choose CareerSathi?
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Our AI-powered platform combines cutting-edge technology with deep understanding 
-              of the Indian job market to provide unparalleled career guidance.
-            </p>
-          </motion.div>
-          
-          <motion.div
-            variants={staggerContainer}
-            initial="initial"
-            whileInView="animate"
-            viewport={{ once: true }}
-            className="grid md:grid-cols-2 lg:grid-cols-4 gap-8"
-          >
-            {features.map((feature, index) => (
-              <FeatureCard key={index} {...feature} />
-            ))}
-          </motion.div>
+            {/* Feature 3 */}
+            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all">
+                <div className="w-10 h-10 bg-green-50 text-green-600 rounded-lg flex items-center justify-center mb-4">
+                    <Trophy className="w-5 h-5" />
+                </div>
+                <h3 className="font-bold text-slate-900 text-lg mb-2">Gamified Growth</h3>
+                <p className="text-sm text-slate-600 leading-relaxed">
+                    Maintain streaks, earn XP for completing tasks, and visualize your consistency over time.
+                </p>
+            </motion.div>
+
+            {/* Feature 4 */}
+            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all">
+                <div className="w-10 h-10 bg-orange-50 text-orange-600 rounded-lg flex items-center justify-center mb-4">
+                    <RefreshCw className="w-5 h-5" />
+                </div>
+                <h3 className="font-bold text-slate-900 text-lg mb-2">Dynamic Pivoting</h3>
+                <p className="text-sm text-slate-600 leading-relaxed">
+                    Changed your mind? Switch from "Frontend" to "Backend" instantly. The AI preserves relevant progress.
+                </p>
+            </motion.div>
+
+            {/* Feature 5 */}
+            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all">
+                <div className="w-10 h-10 bg-pink-50 text-pink-600 rounded-lg flex items-center justify-center mb-4">
+                    <LineChart className="w-5 h-5" />
+                </div>
+                <h3 className="font-bold text-slate-900 text-lg mb-2">Skill Analytics</h3>
+                <p className="text-sm text-slate-600 leading-relaxed">
+                    See exactly how much you've learned. Visual progress bars separate "Skills" from "Projects".
+                </p>
+            </motion.div>
+
+             {/* Feature 6 */}
+             <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all">
+                <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center mb-4">
+                    <Briefcase className="w-5 h-5" />
+                </div>
+                <h3 className="font-bold text-slate-900 text-lg mb-2">Job Simulation</h3>
+                <p className="text-sm text-slate-600 leading-relaxed">
+                    (Coming Soon) Simulate a "Day in the Life" of your target role before you commit to the roadmap.
+                </p>
+            </motion.div>
+
+          </div>
         </div>
       </section>
 
-      {/* Your Journey to Success Section */}
-      <section id="how-it-works" className="py-20 bg-gradient-to-br from-purple-50 to-pink-50">
+      {/* 3. PRODUCT DEMO (Exact Replica of roadmapss.jpg) */}
+      <section className="py-24  overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 60 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl md:text-5xl font-bold font-display mb-6 text-gradient">
-              Your Journey to Success
-            </h2>
-            <p className="text-xl text-gray-600 max-w-4xl mx-auto">
-              From confusion to clarity, from dreams to reality. Experience the complete transformation process that has helped 50,000+ students find their perfect career path.
-            </p>
-          </motion.div>
-          
-          {/* Interactive Journey Flow */}
-          <div className="relative">
-            {/* Journey Path Line */}
-            <div className="hidden md:block absolute top-1/2 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 transform -translate-y-1/2 z-0"></div>
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
             
-            <div className="grid md:grid-cols-5 gap-8 relative z-10">
-              {[
-                {
-                  phase: "Discovery",
-                  title: "Smart Assessment",
-                  description: "22-question AI assessment covering personality, skills, interests, and goals",
-                  icon: "🎯",
-                  color: "from-blue-500 to-blue-600",
-                  features: ["Personality Analysis", "Skill Mapping", "Interest Profiling"]
-                },
-                {
-                  phase: "Analysis",
-                  title: "AI Processing",
-                  description: "Google Cloud Vertex AI analyzes your profile against 200+ career paths and market data",
-                  icon: "🤖",
-                  color: "from-purple-500 to-purple-600",
-                  features: ["Market Analysis", "Skill Gap Detection", "Career Matching"]
-                },
-                {
-                  phase: "Recommendation",
-                  title: "Personalized Results",
-                  description: "Get 3-5 career matches with detailed roadmaps, salary insights, and growth potential",
-                  icon: "📊",
-                  color: "from-green-500 to-green-600",
-                  features: ["Career Matches", "Salary Insights", "Growth Projections"]
-                },
-                {
-                  phase: "Planning",
-                  title: "Action Roadmap",
-                  description: "Step-by-step learning path with courses, projects, and milestones tailored for you",
-                  icon: "🗺️",
-                  color: "from-orange-500 to-orange-600",
-                  features: ["Learning Path", "Project Ideas", "Skill Development"]
-                },
-                {
-                  phase: "Success",
-                  title: "Continuous Support",
-                  description: "24/7 AI mentor, progress tracking, and career guidance as you grow and evolve",
-                  icon: "🚀",
-                  color: "from-pink-500 to-pink-600",
-                  features: ["AI Mentoring", "Progress Tracking", "Career Updates"]
-                }
-              ].map((item, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 60 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.15 }}
-                  viewport={{ once: true }}
-                  whileHover={{ y: -10, scale: 1.02 }}
-                  className="relative"
-                >
-                  {/* Journey Node */}
-                  <div className="bg-white rounded-2xl p-6 shadow-xl border border-gray-100 hover:shadow-2xl transition-all duration-300 relative">
-                    {/* Phase Badge */}
-                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                      <span className={`px-3 py-1 bg-gradient-to-r ${item.color} text-white text-xs font-semibold rounded-full shadow-lg`}>
-                        {item.phase}
-                      </span>
-                    </div>
-                    
-                    {/* Icon */}
-                    <div className="text-4xl mb-4 text-center">{item.icon}</div>
-                    
-                    {/* Content */}
-                    <h3 className="text-lg font-bold text-gray-900 mb-3 text-center">{item.title}</h3>
-                    <p className="text-sm text-gray-600 mb-4 text-center leading-relaxed">{item.description}</p>
-                    
-                    {/* Features */}
-                    <div className="space-y-2">
-                      {item.features.map((feature, idx) => (
-                        <div key={idx} className="flex items-center text-xs text-gray-700">
-                          <div className={`w-2 h-2 bg-gradient-to-r ${item.color} rounded-full mr-2 flex-shrink-0`}></div>
-                          <span>{feature}</span>
+            {/* Left Copy */}
+            <div>
+              <div className="inline-block px-4 py-1 rounded-full bg-purple-50 text-purple-600 text-sm font-semibold mb-6">
+                Interactive Learning
+              </div>
+              <h2 className="text-3xl md:text-5xl font-bold text-slate-900 mb-6">
+                Your Roadmap is <br/> Alive.
+              </h2>
+              <p className="text-lg text-slate-600 mb-8 leading-relaxed">
+                Static PDFs don't work. CareerSathi's roadmaps are interactive environments where you track skills and projects in real-time.
+              </p>
+
+              <div className="space-y-6">
+                <div className="flex gap-4 items-start">
+                  <div className="p-2 bg-blue-50 text-blue-600 rounded-lg mt-1">
+                    <CheckCircle2 className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-bold text-slate-900">Actionable Tracking</h4>
+                    <p className="text-slate-500 text-sm">Mark tasks complete as you go. Visual progress bars keep you motivated.</p>
+                  </div>
+                </div>
+                
+                <div className="flex gap-4 items-start">
+                  <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg mt-1">
+                    <BookOpen className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-bold text-slate-900">One-Click Learning</h4>
+                    <p className="text-slate-500 text-sm">Stuck? Click "Learn More" to get instant AI-curated resources for that specific task.</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4 items-start">
+                  <div className="p-2 bg-orange-50 text-orange-600 rounded-lg mt-1">
+                    <Zap className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-bold text-slate-900">Adaptive Difficulty</h4>
+                    <p className="text-slate-500 text-sm">Use the "Increase Difficulty" button to instantly upgrade your curriculum.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: UI Mockup Matching "roadmapss.jpg" EXACTLY */}
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-tr from-blue-100 via-purple-100 to-white rounded-full blur-3xl opacity-60 transform scale-110"></div>
+              
+              <div className="relative bg-[#F8F9FC] border border-slate-200 rounded-2xl shadow-2xl overflow-hidden max-w-lg mx-auto">
+                
+                {/* 1. Header Area */}
+                <div className="bg-white p-5 border-b border-slate-100">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex gap-3">
+                        <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600">
+                            <LayoutDashboard className="w-5 h-5" />
                         </div>
-                      ))}
+                        <div>
+                            <h3 className="font-bold text-slate-900 text-sm leading-tight max-w-[200px]">
+                                Freelance Full-Stack JavaScript/TypeScript Developer
+                            </h3>
+                            <p className="text-[10px] text-slate-400 mt-1">Created Today • AI Generated</p>
+                        </div>
+                    </div>
+                    {/* Buttons: Increase Difficulty & Delete */}
+                    <div className="flex gap-2">
+                        <button className="flex items-center gap-1 text-[10px] font-bold text-slate-600 bg-white border border-slate-200 px-3 py-1.5 rounded hover:bg-slate-50 shadow-sm">
+                           <Zap size={12} className="text-orange-500" /> Increase Difficulty
+                        </button>
+                        <button className="text-[10px] font-bold text-white bg-red-500 px-3 py-1.5 rounded hover:bg-red-600 flex items-center gap-1 shadow-sm shadow-red-200">
+                            <Trash2 size={12} /> Delete
+                        </button>
                     </div>
                   </div>
-                  
-                  {/* Connection Arrow (Desktop) */}
-                  {index < 4 && (
-                    <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-20">
-                      <div className={`w-8 h-8 bg-gradient-to-r ${item.color} rounded-full flex items-center justify-center shadow-lg`}>
-                        <ArrowRight className="w-4 h-4 text-white" />
-                      </div>
+
+                  {/* 2. Progress Bars */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-white border border-slate-100 p-3 rounded-xl shadow-sm">
+                        <div className="flex justify-between text-[11px] font-bold text-slate-700 mb-2">
+                            <span>Skills Progress</span>
+                            <span>0%</span>
+                        </div>
+                        <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                            <div className="h-full w-[5%] bg-blue-500 rounded-full"></div>
+                        </div>
+                        <div className="text-[10px] font-bold text-slate-900 mt-1">0/7</div>
                     </div>
-                  )}
-                </motion.div>
-              ))}
+                    <div className="bg-white border border-slate-100 p-3 rounded-xl shadow-sm">
+                        <div className="flex justify-between text-[11px] font-bold text-slate-700 mb-2">
+                            <span>Projects Progress</span>
+                            <span>0%</span>
+                        </div>
+                        <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                            <div className="h-full w-0 bg-purple-500 rounded-full"></div>
+                        </div>
+                        <div className="text-[10px] font-bold text-slate-900 mt-1">0/4</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Task List Body */}
+                <div className="p-5 space-y-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <h4 className="text-sm font-bold text-slate-900">Skills to Learn</h4>
+                    <span className="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[10px] font-bold">7</span>
+                  </div>
+
+                  {/* Task Item 1 */}
+                  <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col gap-3">
+                    <div>
+                        <h5 className="text-xs font-bold text-slate-900">Advanced JavaScript & TypeScript</h5>
+                        <p className="text-[10px] text-slate-500 mt-1 leading-relaxed">
+                            Focus on modern features, asynchronous programming, and functional programming paradigms. Crucial for complex apps.
+                        </p>
+                    </div>
+                    {/* Buttons: Mark Complete & Learn More */}
+                    <div className="flex gap-2 justify-end pt-2">
+                        <button className="text-[10px] font-semibold text-white bg-[#6366f1] px-4 py-1.5 rounded-md hover:bg-indigo-700 shadow-sm shadow-indigo-200">
+                            Mark Complete
+                        </button>
+                        <button className="text-[10px] font-semibold text-[#6366f1] bg-indigo-50 px-4 py-1.5 rounded-md hover:bg-indigo-100 border border-indigo-100">
+                            Learn More
+                        </button>
+                    </div>
+                  </div>
+
+                   {/* Task Item 2 */}
+                   <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col gap-3 opacity-60">
+                    <div>
+                        <h5 className="text-xs font-bold text-slate-900">Mastering a Frontend Framework (React)</h5>
+                        <p className="text-[10px] text-slate-500 mt-1 leading-relaxed">
+                            Dive deep into React.js including hooks, context API, and state management (Redux/Zustand).
+                        </p>
+                    </div>
+                    <div className="flex gap-2 justify-end pt-2">
+                        <button className="text-[10px] font-semibold text-white bg-[#6366f1] px-4 py-1.5 rounded-md">
+                            Mark Complete
+                        </button>
+                        <button className="text-[10px] font-semibold text-[#6366f1] bg-indigo-50 px-4 py-1.5 rounded-md border border-indigo-100">
+                            Learn More
+                        </button>
+                    </div>
+                  </div>
+
+                </div>
+
+              </div>
             </div>
           </div>
-          
-          {/* Success Metrics */}
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.8 }}
-            viewport={{ once: true }}
-            className="mt-16 bg-white rounded-2xl p-8 shadow-xl border border-gray-100"
-          >
-            <h3 className="text-2xl font-bold text-center text-gray-900 mb-8">Journey Success Metrics</h3>
-            <div className="grid md:grid-cols-4 gap-6">
-              {[
-                { metric: "95%", label: "Success Rate", desc: "Students achieve career goals" },
-                { metric: "3-6", label: "Months Average", desc: "Time to career clarity" },
-                { metric: "200+", label: "Career Paths", desc: "Available recommendations" },
-                { metric: "24/7", label: "AI Support", desc: "Always available guidance" }
-              ].map((stat, index) => (
-                <div key={index} className="text-center">
-                  <div className="text-3xl font-bold text-gradient mb-2">{stat.metric}</div>
-                  <div className="font-semibold text-gray-900 mb-1">{stat.label}</div>
-                  <div className="text-sm text-gray-600">{stat.desc}</div>
+        </div>
+      </section>
+
+      {/* 4. [NEW] YOUR JOURNEY SECTION */}
+     <section id='how-it-works' className="py-24 relative overflow-hidden">
+        
+        {/* --- ADDED: LIGHT BACKGROUND GRID --- */}
+        <div className="absolute inset-0 z-0 opacity-[1] bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+
+        <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-12">
+                Your Transformation Timeline
+            </h2>
+            
+            <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent">
+                
+                {/* Step 1 */}
+                <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-slate-300 group-[.is-active]:bg-blue-600 group-[.is-active]:text-white text-slate-500 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                        <Map size={18} />
+                    </div>
+                    <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-5 rounded-xl border border-slate-100 shadow-sm">
+                        <div className="flex items-center justify-between space-x-2 mb-1">
+                            <div className="font-bold text-slate-900">Day 1: The Blueprint</div>
+                            <time className="font-mono text-xs text-slate-500">Start</time>
+                        </div>
+                        <div className="text-slate-600 text-sm">You chat with the AI, define your target role, and generate your custom roadmap.</div>
+                    </div>
+                </motion.div>
+
+                {/* Step 2 */}
+                <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-white border-slate-200 text-purple-600 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                        <CalendarCheck size={18} />
+                    </div>
+                    <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-5 rounded-xl border border-slate-100 shadow-sm">
+                        <div className="flex items-center justify-between space-x-2 mb-1">
+                            <div className="font-bold text-slate-900">Day 7: The Habit</div>
+                            <time className="font-mono text-xs text-slate-500">1 Week</time>
+                        </div>
+                        <div className="text-slate-600 text-sm">You've completed 35 specific tasks. No procrastination, just daily execution of the "Daily 5".</div>
+                    </div>
+                </motion.div>
+
+                {/* Step 3 */}
+                <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-white border-slate-200 text-green-600 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                        <Briefcase size={18} />
+                    </div>
+                    <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-5 rounded-xl border border-slate-100 shadow-sm">
+                        <div className="flex items-center justify-between space-x-2 mb-1">
+                            <div className="font-bold text-slate-900">Day 45: The Projects</div>
+                            <time className="font-mono text-xs text-slate-500">1.5 Months</time>
+                        </div>
+                        <div className="text-slate-600 text-sm">You move from "Learning" to "Building". Your roadmap now assigns real-world projects to build your portfolio.</div>
+                    </div>
+                </motion.div>
+
+                {/* Step 4 */}
+                <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeIn} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-white border-slate-200 text-orange-600 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                        <GraduationCap size={18} />
+                    </div>
+                    <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-5 rounded-xl border border-slate-100 shadow-sm">
+                        <div className="flex items-center justify-between space-x-2 mb-1">
+                            <div className="font-bold text-slate-900">Day 90: Job Ready</div>
+                            <time className="font-mono text-xs text-slate-500">3 Months</time>
+                        </div>
+                        <div className="text-slate-600 text-sm">Roadmap 100% complete. You have the skills, the projects, and the confidence to crack interviews.</div>
+                    </div>
+                </motion.div>
+
+            </div>
+        </div>
+      </section>
+
+      {/* 5. DAILY TASKS (The Retention Hook) */}
+      <section className="py-20  ">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+           <div className="inline-block px-4 py-1 rounded-full bg-green-500/10 text-green-700 border border-green-500/30 text-sm font-semibold mb-6">
+                Habit Building
+           </div>
+           <h2 className="text-3xl md:text-5xl font-bold mb-6">
+             "What should I do today?" <br/>
+             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Solved.</span>
+           </h2>
+           <p className="text-lg text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed">
+             Stop doom-scrolling tutorials. Every morning, CareerSathi assigns you 
+             5 manageable tasks based on your active roadmap. Finish them, and you win the day.
+           </p>
+           
+           <div className="grid grid-cols-2 md:grid-cols-5 gap-4 max-w-3xl mx-auto">
+              {[1, 2, 3, 4, 5].map((num) => (
+                <div key={num} className="bg-slate-800/10 border border-slate-300 p-4 rounded-xl flex flex-col items-center hover:bg-slate-400/30 transition-colors cursor-default group">
+                    <div className="w-10 h-10 text-white rounded-full bg-indigo-600 shadow-xl shadow-blue-800 flex items-center justify-center font-bold text-sm mb-4  group-hover:scale-110 transition-transform">
+                        {num}
+                    </div>
+                    <div className="h-1.5 w-12 bg-blue-700 rounded-full"></div>
                 </div>
               ))}
-            </div>
-          </motion.div>
-          
-          {/* Interactive Demo Button */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 1 }}
-            viewport={{ once: true }}
-            className="text-center mt-12"
-          >
-            <Link href="/assessment" className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
-              <Sparkles className="w-5 h-5 mr-2" />
-              Start Your Journey Now
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Link>
-            <p className="text-sm text-gray-600 mt-3">Takes only 10 minutes • Completely free • Instant results</p>
-          </motion.div>
+           </div>
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 60 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl md:text-5xl font-bold font-display mb-6 text-gradient">
-              Success Stories
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Hear from students who transformed their careers with CareerSathi
-            </p>
-          </motion.div>
-          
-          <motion.div
-            variants={staggerContainer}
-            initial="initial"
-            whileInView="animate"
-            viewport={{ once: true }}
-            className="grid md:grid-cols-3 gap-8"
-          >
-            {testimonials.map((testimonial, index) => (
-              <TestimonialCard key={index} {...testimonial} />
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 60 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Ready to Shape Your Future?
-            </h2>
-            <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-              Join thousands of students who have already discovered their perfect career path. 
-              Start your journey today with CareerSathi.
-            </p>
-            <Link href="/auth/signup" className="inline-flex items-center px-8 py-4 bg-white text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
-              Get Started Free
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </Link>
-          </motion.div>
+      {/* 6. TRUST FOOTER */}
+      <section className="py-16 bg-slate-50 border-t border-slate-100">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <p className="text-sm font-semibold text-slate-400 uppercase tracking-widest mb-8">
+            Engineered by Zelphine
+          </p>
+          <div className="flex flex-wrap justify-center gap-8 md:gap-16 opacity-70 grayscale hover:grayscale-0 transition-all">
+             <div className="flex items-center gap-2 text-slate-900 font-bold text-lg">
+                <ShieldCheck className="w-6 h-6 text-slate-900" /> Secure Data
+             </div>
+             <div className="flex items-center gap-2 text-slate-900 font-bold text-lg">
+                <BrainCircuit className="w-6 h-6 text-slate-900" /> Zelphine AI
+             </div>
+             <div className="flex items-center gap-2 text-slate-900 font-bold text-lg">
+                <Lock className="w-6 h-6 text-slate-900" /> Private
+             </div>
+          </div>
         </div>
       </section>
 

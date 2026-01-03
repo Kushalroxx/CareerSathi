@@ -5,7 +5,6 @@ import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
 import { VectorDb } from "@/lib/vectorDb";
 import { userProfileToString } from "@/lib/userProfileToString";
-import { summarizeRoadmapsToString } from "@/lib/summerizeRoadmapToString";
 import { ChatMessage } from "@/types/chat";
 
 export async function POST(req: Request) {
@@ -20,7 +19,7 @@ export async function POST(req: Request) {
     
     const history: ChatMessage[] = Array.isArray(body.history) ? body.history : [];
 
-    const lastMessages = history.slice(-5).map((msg) => `${msg.role === "user" ? "User" : "CareerSathi"}: ${msg.text}`).join("\n");
+    const lastMessages = history.slice(-3).map((msg) => `${msg.role === "user" ? "User" : "CareerSathi"}: ${msg.text}`).join("\n");
     const chatId: string = body.chatId;
 
     if (!chatId) {
@@ -30,7 +29,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Message not provided" }, { status: 400 });
     }
 
-    // Task 1: Get Conversation History (Embedding + Vector Search)
     const conversationHistoryPromise = (async () => {
       const embaddedMessage = await textEmbedding(message);
       const vectorDb = VectorDb.getInstance();
@@ -43,7 +41,6 @@ export async function POST(req: Request) {
       return { conversationText, embaddedMessage };
     })();
     
-    // Task 2: Get User Profile (Cache or DB)
     const userProfilePromise = (async () => {
       const userProfile = await prisma.userProfile.findUnique({
         where: { userId: session.user.id },
@@ -65,45 +62,35 @@ export async function POST(req: Request) {
       const userProfileString = userProfileToString(userProfile);
       return userProfileString;
     })();
-    
-    // Task 3: Get Roadmap Context (Cache or DB)
     const roadmapContextPromise = (async () => {
-      const activeRoadmaps = await prisma.roadmap.findMany({
-        where: {
-          userId: session.user.id
-        },
-        include: {
-          skillsToLearn: { 
-            where: { done: true },
-            select: { skill: true }
-          },
-          recommendedProjects: {
-            where: { done: true },
-            select: { title: true }
-          }, 
-        }
-      });
-      
-      const completedItemsContext = JSON.stringify(summarizeRoadmapsToString(activeRoadmaps));
-      return completedItemsContext;
-    })();
+  const activeRoadmaps = await prisma.roadmap.findMany({
+    where: {
+    userId: session.user.id
+  },
+  select: {
+    careerPath: true, 
+    skillsToLearn: { 
+      select: { skill: true, done: true } 
+    },
+    recommendedProjects: {
+      select: { title: true, done: true } 
+    }, 
+  }
+});
+  
+  return activeRoadmaps
+})();
     
-    // Await all tasks to complete in parallel
     const [
       historyResult,
       userProfileString,
-      completedItemsContext
+      activeRoadmaps
     ] = await Promise.all([
       conversationHistoryPromise,
       userProfilePromise,
       roadmapContextPromise
     ]);
-    
-    // Destructure the results from Task 1
     const { conversationText, embaddedMessage } = historyResult;
-    // --- 2. CONSTRUCT SINGLE PROMPT ---
-const {activePaths, completedSkills, completedProjects} = JSON.parse(completedItemsContext);
-
 const prompt = `You are CareerSathi, a friendly but practical career and learning guidance mentor.
 Output rules:
 
@@ -138,11 +125,7 @@ UserName:${session.user.name}
 User profile context (from form submission):${userProfileString}
 Conversation so far:${conversationText + " " + lastMessages}
 --- User's Current Progress (Use this for logic) ---
-Active Career Path: ${activePaths}  
-Completed Skills: [${completedSkills}]
-
-Completed Projects: [${completedProjects}]
-
+${JSON.stringify(activeRoadmaps)}
 --- End of User's Progress ---
 
 User says: "${message}"
@@ -175,7 +158,7 @@ If this guideline is met, STOP.
 
 --- Guideline 4: Roadmap Generation & Upskilling Logic ---
 Generate a full "roadmap" object ONLY IF:
-The ${activePaths} variable is EMPTY (it's their first roadmap) AND the user has requested a path (Guideline 2).
+The ${activeRoadmaps.map((rm) => `"${rm.careerPath}"`)} variable is EMPTY (it's their first roadmap) AND the user has requested a path (Guideline 2).
 OR The "User says" message IS a clear confirmation to a warning from Guideline 3 (e.g., it contains "confirm new", "yes proceed", "generate new", ignoring case).
 
 When generating the roadmap:
@@ -236,13 +219,8 @@ Only use internet search if you need to find current, external information like 
 Do not use search for simple conversation or to answer questions about the user's profile/history/greeting.
 
 If you use search, include the date and a "## Sources" section in your "content".`;
-  
-  // --- 3. CALL LLM ---
-  // console.log("CareerSathi prompt:",conversationText?true:false);
-  console.log("prev conversation:", conversationText, "lastMessages:", lastMessages);
-  
+
   const rawReply = (await askVertex(prompt)).trim();
-  // console.log("CareerSathi raw reply:", rawReply);
   
   const match = rawReply.match(/```json\s*([\s\S]*?)```/) || rawReply.match(/\{[\s\S]*\}/);
   
@@ -251,8 +229,6 @@ If you use search, include the date and a "## Sources" section in your "content"
     }
     
     const reply = JSON.parse(match[1] ?? match[0]);
-
-    // --- 4. RUN BACKGROUND TASKS ---
     const background = (async() => {
       try {
         const vectorDb = VectorDb.getInstance();
@@ -264,7 +240,6 @@ If you use search, include the date and a "## Sources" section in your "content"
       }
     })();
 
-    // --- 5. PROCESS THE SINGLE REPLY ---
     if (reply.roadmap && typeof reply.roadmap === 'object' && reply.roadmap.careerPath) {
       const roadmap = reply.roadmap;
       const skillsToLearn = Array.isArray(roadmap.skillsToLearn) ? roadmap.skillsToLearn : [];

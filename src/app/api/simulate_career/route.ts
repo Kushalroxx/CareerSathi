@@ -4,6 +4,7 @@ import { VertexAI } from "@google-cloud/vertexai";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
+import { Result } from "postcss";
 
 export async function POST(req: Request) {
   try {
@@ -16,10 +17,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing 'careerRole' in request body." }, { status: 400 });
     }
     const userContext = await prisma.userProfile.findUnique({
-      where: {
-        userId: session.user.id,
-      }
+      where: { userId: session.user.id }
     })
+    
     // Initialize Vertex AI client
     const vertexAI = new VertexAI({
       project: process.env.GOOGLE_PROJECT_ID,
@@ -29,144 +29,140 @@ export async function POST(req: Request) {
     const geminiModel = vertexAI.getGenerativeModel({ model: "gemini-2.5-flash" });
     const imageModel = vertexAI.getGenerativeModel({ model: "gemini-2.5-flash-image" }); 
 
-    // Prompt: ask Gemini to return JSON only. NOTE: Do NOT compute overall readiness here.
-    // THIS IS THE MODIFIED PROMPT
-  const prompt = `
-You are "Hars_h", a Career Mentor AI. Your purpose is to provide a blunt, unfiltered "Reality Check" simulation. You must avoid generic praise. You identify weaknesses directly and provide tough, actionable feedback.
+ const prompt = `
+You are "Hars_h", a Career Mentor AI. 
+**TONE:** "Compassionate Reality" (Honest but encouraging). Use "sugar-coated reality" language. 
+Your goal is to guide the user without breaking their spirit. Identify weaknesses as "Growth Opportunities".
 
-Generate a single JSON object (no extra text) for the career "${careerRole}", **critically tailored** to the user's specific context. The user's level (student, professional, switcher) and background (arts, science, sports, unemployed) MUST determine the complexity, stakes, and theme of the scenarios.
+Generate a single JSON object (no extra text) for the career "${careerRole}", **critically tailored** to the user's specific context. 
+User Context: ${JSON.stringify(userContext || {})}
 
-User Context: ${JSON.stringify(userContext)}
-
-Example of tailoring:
-- If user is a 'school student' asking for 'Doctor', scenario should be about a tough biology exam or volunteering dilemma.
-- If user is a 'career switcher' asking for 'Doctor', scenario should be about patient-family conflict or hierarchical team stress.
-- If user is an 'aspiring actor', scenario should be about handling rejection or a difficult director, not corporate teamwork.
-- If user is 'unemployed', scenario should focus on resilience, re-skilling, or networking challenges.
+**SPEED INSTRUCTIONS:**
+1. Generate **EXACTLY 2** scenarios (Do not generate 4-5).
+2. Keep descriptions concise (max 2 sentences).
+3. Do NOT include a "visual_prompt" field in the JSON (we handle images separately).
 
 Schema:
 {
-  "careerRole": "<title>",
-  "overview": "<1-2 sentence career snapshot targeted for this user's level>",
-  "average_daily_routine": "<one paragraph describing the typical daily routine (hours, major tasks)>",
-  "core_soft_skills": ["skill1","skill2", "..."],
+  "careerRole": "${careerRole}",
+  "overview": "<1-2 sentence encouraging but realistic snapshot>",
+  "average_daily_routine": "<one paragraph describing typical hours/tasks>",
+  "core_soft_skills": ["skill1","skill2"],
 
   "scenarios": [
     {
       "id": 1,
       "title": "Short, realistic scenario title",
-      "description": "3-4 sentence realistic dilemma representing a common, high-impact challenge for this role, *tailored to the user's context*. (e.g., tech, non-tech, arts, sports, army)",
-      "skill_focus": "Primary soft skill tested (e.g., 'Resilience', 'Ethical Judgment', 'Stress Tolerance', 'Adaptability')",
+      "description": "2 sentences on a realistic dilemma tailored to the user.",
+      "skill_focus": "Primary soft skill",
       "stakeholder_persona": {
-        "role": "Stakeholder role (e.g., 'Angry Client', 'Dismissive Colonel', 'Rival Athlete', 'Casting Director')",
-        "initial_message": "One-line urgent message from stakeholder"
+        "role": "Stakeholder role",
+        "initial_message": "One-line urgent message"
       },
-      "visual_prompt": "A photorealistic, context-aware image prompt (max 80 words) visualizing the scenario (lighting, emotion, environment).",
       "choices": [
         {"choice_id": 1, "action": "Choice text"},
         {"choice_id": 2, "action": "Choice text"},
         {"choice_id": 3, "action": "Choice text"}
       ],
       "expected_choice_evaluations": {
-        "1": {"evaluation_hint":"...", "impact_score": 0-100},
-        "2": {"evaluation_hint":"...", "impact_score": 0-100},
-        "3": {"evaluation_hint":"...", "impact_score": 0-100}
+        "1": {"evaluation_hint":"HTML_STRING", "impact_score": 0-100},
+        "2": {"evaluation_hint":"HTML_STRING", "impact_score": 0-100},
+        "3": {"evaluation_hint":"HTML_STRING", "impact_score": 0-100}
       }
     }
-    // Repeat 4-5 items
   ],
 
   "related_roles": [
-    {"role":"Alternative role suggested if fit is low","reason":"one-line reason based on user's context"}
+    {"role":"Alternative role","reason":"one-line reason"}
   ]
 }
 
 **CRITICAL EVALUATION FORMAT:**
-For each "evaluation_hint", you must first internally decide on 4 points:
-1.  reality_check: The blunt, unfiltered truth about this choice.
-2.  identified_weakness: The specific weakness this choice reveals (e.g., 'Impulsivity', 'Avoidance of Conflict', 'Lack of Strategic Thinking'). If a good choice, state the strength.
-3.  micro_task: A single, concrete, 1-2 sentence actionable task to address the weakness (e.g., 'For 3 days, practice the '5-Why' technique on a small problem before acting.').
-4.  inspiration_quote: A short, tough, inspiring line (e.g., 'The obstacle is the way.', 'Hard choices, easy life.').
+For each "evaluation_hint", combine these 4 points into a single HTML string.
+Note: "Weakness" is renamed to "Growth Opportunity".
 
-Then, you MUST combine these 4 points into a **single JSON string** for the "evaluation_hint" field using this exact HTML format:
-"<b>Reality Check:</b> [reality_check text]<br><b>Weakness:</b> [weakness text]<br><b>Micro-Task:</b> [micro_task text]<br><b>Inspiration:</b> [inspiration_quote text]"
-
-Example for a bad choice:
-"evaluation_hint": "<b>Reality Check:</b> This is a-level avoidance. In the real world, this problem will return twice as large tomorrow, and your boss will see you as unreliable.<br><b>Weakness:</b> Conflict Aversion.<br><b>Micro-Task:</b> Tomorrow, find one small, uncomfortable conversation you've been avoiding (email or in-person) and initiate it.<br><b>Inspiration:</b> The comfort zone is a beautiful place, but nothing ever grows there."
-
-Example for a good choice:
-"evaluation_hint": "<b>Reality Check:</b> This is a solid, professional response. You've addressed the core issue without creating new ones. This builds trust.<br><b>Weakness:</b> Confident Decision-Making (A Strength).<br><b>Micro-Task:</b> Mentor someone else on your team for 15 minutes this week on how you reached this conclusion.<br><b>Inspiration:</b> You are what you repeatedly do. Excellence is a habit."
+Format:
+"<b>Reality Check:</b> [Truth]<br><b>Growth Opportunity:</b> [Skill to improve]<br><b>Micro-Task:</b> [Action]<br><b>Inspiration:</b> [Quote]"
 
 ---
 **CRITICAL OUTPUT CONSTRAINTS (MANDATORY):**
 1.  **JSON ONLY:** Your *entire* response MUST be a single, valid JSON object.
-2.  **NO EXTRA TEXT:** Do NOT add *any* text, commentary, or markdown (like \`\`\`json) before the opening \`{\` or after the closing \`}\`.
-3.  **ESCAPE ALL STRINGS:** This is the most common error. All string values within the JSON *must* be properly escaped. Pay extreme attention to the "evaluation_hint" string. Any double-quotes (\`"\`) inside that string *must* be escaped as \`\\"\`. Any literal newlines *must* be escaped as \`\\n\` (or just use the \`<br>\` tag as instructed).
-4.  **CHECK SYNTAX:** Ensure there are no trailing commas in your lists or objects.
+2.  **NO EXTRA TEXT:** Do NOT add *any* text, commentary, or markdown (like \`\`\`json).
+3.  **ESCAPE ALL STRINGS:** Escape all internal double quotes (\\") inside strings.
 ---
 `;
 
-    const result = await geminiModel.generateContent(
-      {
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-      },
-      // @ts-ignore
-      {
-        
-        responseMimeType: "application/json",
-      }
-    );
-
-    const jsonText = result.response?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    const cleaned = jsonText.replace(/^```(?:json)?\s*/, "").replace(/\s*```$/, "");
-
-    let parsed;
-    try {
-      parsed = JSON.parse(cleaned);
-    } catch (e) {
-      console.error("Failed to parse JSON from Gemini:", cleaned);
-      return NextResponse.json({ error: "Failed to parse JSON from Gemini.", raw: cleaned }, { status: 500 });
-    }
-
-    // Basic validation
-    if (!parsed.scenarios || !Array.isArray(parsed.scenarios) || parsed.scenarios.length < 1) {
-      return NextResponse.json({ error: "Gemini returned invalid scenario structure.", raw: parsed }, { status: 500 });
-    }
-
-    // Optionally generate a primary image using the first scenario visual_prompt
-    console.log(parsed);
+    const imagePrompt = `Cinematic, photorealistic shot of a professional ${careerRole} in their typical working environment. Professional lighting, high detail, 4k.`;
     
-    const firstScenario = parsed.scenarios[0];
-    let primaryImageBase64: string | undefined = undefined;
-
-    try {
-      if (firstScenario.visual_prompt && firstScenario.visual_prompt.length > 10) {
-        console.log("visual prompt:", firstScenario.visual_prompt);
-        
-        const imageResult = await imageModel.generateContent(
-          {
-            contents: [{ role: "user", parts: [{ text: firstScenario.visual_prompt }] }],
-          },
-          // @ts-ignore
-          {
-            numberOfImages: 1,
-            aspectRatio: "16:9",
-            outputMimeType: "image/jpeg",
-          }
-        );
-
-        const base64Img = imageResult.response?.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-        if (base64Img) {
-          primaryImageBase64 = `data:image/jpeg;base64,${base64Img}`;
+    const generateImageWithRetry = async (attempts = 3) => {
+        for (let i = 0; i < attempts; i++) {
+            try {
+                console.log(`Image Gen Attempt ${i + 1}/${attempts}...`);
+                const result = await imageModel.generateContent({
+                    contents: [{ role: "user", parts: [{ text: imagePrompt }] }],
+                }, 
+                
+                // @ts-ignore
+                { numberOfImages: 1, aspectRatio: "16:9", outputMimeType: "image/jpeg" });
+                
+                console.log(result.response?.candidates?.[0]?.content?.parts);
+                return result; 
+            } catch (error) {
+                console.warn(`Image Attempt ${i + 1} failed:`, error);
+                if (i === attempts - 1) return null; 
+            }
         }
-      }
-    } catch (imgErr) {
-      console.warn("Image generation issue (non-fatal):", imgErr);
+        return null;
+    };
+
+
+    // 2. Text Generation with Retry Logic
+    const generateTextWithRetry = async (attempts = 3) => {
+        for (let i = 0; i < attempts; i++) {
+            try {
+                // console.log(`Text Gen Attempt ${i + 1}/${attempts}...`);
+                
+                const result = await geminiModel.generateContent({
+                    contents: [{ role: "user", parts: [{ text: prompt }] }],
+                }, 
+                // @ts-ignore
+                { responseMimeType: "application/json" });
+
+                const jsonText = result.response?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+                const cleaned = jsonText.replace(/^```(?:json)?\s*/, "").replace(/\s*```$/, "");
+                
+                // PARSE & VALIDATE
+                const parsed = JSON.parse(cleaned);
+                
+                if (!parsed.scenarios || !Array.isArray(parsed.scenarios) || parsed.scenarios.length < 1) {
+                    throw new Error("Invalid JSON structure: Missing scenarios array");
+                }
+                
+                return parsed; // Success! Return immediately.
+
+            } catch (error) {
+                console.warn(`Text Attempt ${i + 1} failed:`, error);
+                if (i === attempts - 1) throw error; // If last attempt failed, crash.
+            }
+        }
+    };
+
+    // 3. Await Both (Both will retry internally if needed)
+    const [parsedData, imageResult] = await Promise.all([
+        generateTextWithRetry(), 
+        generateImageWithRetry()
+    ]);
+
+    // --- PROCESS RESULTS ---
+
+    let primaryImageBase64: string | undefined = undefined;
+    if (imageResult) {
+        const base64Img = imageResult.response?.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data||imageResult.response?.candidates?.[0]?.content?.parts?.[1]?.inlineData?.data;
+        if (base64Img) primaryImageBase64 = `data:image/jpeg;base64,${base64Img}`;
     }
 
-    // Convert expected_choice_evaluations into per-choice fields (kept in payload, but frontend will hide evaluation until submission)
-    // This code remains UNCHANGED because the prompt is now formatting the data for it.
-    for (const s of parsed.scenarios) {
+    // Convert evaluations
+    for (const s of parsedData.scenarios) {
       const evals = s.expected_choice_evaluations || {};
       const choices = s.choices || [];
       s.choices = choices.map((ch: any) => {
@@ -175,30 +171,30 @@ Example for a good choice:
         return {
           choice_id: ch.choice_id,
           action: ch.action,
-          evaluation_hint: ev.evaluation_hint || null, // This now contains the rich, formatted HTML string
+          evaluation_hint: ev.evaluation_hint || null,
           impact_score: typeof ev.impact_score === "number" ? ev.impact_score : null,
         };
       });
-      // remove heavy field
       delete s.expected_choice_evaluations;
     }
 
     const responsePayload = {
-      careerRole: parsed.careerRole || careerRole,
-      overview: parsed.overview || `A day-in-the-life snapshot for ${careerRole}.`,
-      average_daily_routine: parsed.average_daily_routine || "",
-      core_soft_skills: parsed.core_soft_skills || [],
-      scenarios: parsed.scenarios,
-      related_roles: parsed.related_roles || [],
+      careerRole: parsedData.careerRole || careerRole,
+      overview: parsedData.overview || `A day-in-the-life snapshot for ${careerRole}.`,
+      average_daily_routine: parsedData.average_daily_routine || "",
+      core_soft_skills: parsedData.core_soft_skills || [],
+      scenarios: parsedData.scenarios,
+      related_roles: parsedData.related_roles || [],
       primary_image: primaryImageBase64 ?? null
     };
 
     return NextResponse.json(responsePayload);
+
   } catch (err) {
-    console.error("Error generating career simulation:", err);
+    console.error("Error generating career simulation (All retries failed):", err);
     return NextResponse.json({
-      error: `Failed to generate simulation: ${(err as Error).message}`,
-      details: (err as any).details ?? null
+      error: `Failed to generate simulation after multiple attempts. Please try again.`,
+      details: (err as any).message ?? null
     }, { status: 500 });
   }
 }
