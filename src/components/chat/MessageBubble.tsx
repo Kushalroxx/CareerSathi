@@ -4,36 +4,61 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ChatMessage } from "@/types/chat";
 import Link from "next/link";
+import { Bot, User } from "lucide-react";
 
 export default function MessageBubble({ msg }: { msg: ChatMessage }) {
   const isUser = msg.role === "user";
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 15 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className={`chat-bubble my-2 px-4 py-2 rounded-xl shadow max-w-[90%] break-words text-sm sm:text-base 
-        ${isUser
-          ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white self-end ml-auto"
-          : "bg-gradient-to-r from-blue-50 to-purple-50 text-zinc-900 self-start mr-auto prose prose-sm sm:prose-base"
-        }`}
+      className={`flex my-3 w-full ${isUser ? "justify-end" : "justify-start"}`}
     >
-      {isUser ? msg.text : <ReactMarkdown components={{
-            p: ({ children }) => <p className="mb-3 text-gray-800 leading-6">{children}</p>,
-            ul: ({ children }) => <ul className="list-disc ml-5 mb-3 text-gray-800">{children}</ul>,
-            ol: ({ children }) => <ol className="list-decimal ml-5 mb-3 text-gray-800">{children}</ol>,
-            li: ({ children }) => <li className="mb-1">{children}</li>,
-            h3: ({ children }) => <h3 className="text-lg font-semibold mt-4 mb-2 text-gray-900">{children}</h3>,
-            h4: ({ children }) => <h4 className="text-base font-semibold mt-3 mb-1 text-gray-900">{children}</h4>,
-            strong: ({ children }) => <strong className="font-bold">{children}</strong>,
-            em: ({ children }) => <em className="italic">{children}</em>,
-            a: ({ children, href }) => (
-              <Link target="_blank" href={href||"/roadmap"} className="text-blue-600 bg-blue-50 hover:scale-105 transition-all duration-200 hover:bg-blue-100 p-2 border border-blue-400 rounded-lg block w-full max-w-[300px] truncate text-center" rel="noopener noreferrer">
-                {children && children.toString().length > 50 ? children?.toString().slice(0, 50) + "..." : children}
-              </Link>
-            ),
-          }} remarkPlugins={[remarkGfm]}>{msg.text}</ReactMarkdown>}
+      <div className={`flex max-w-[90%] md:max-w-[85%] gap-3 ${isUser ? "flex-row-reverse" : "flex-row"}`}>
+        
+        {/* Avatar Icons */}
+        <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${isUser ? "bg-purple-600" : "bg-blue-100 dark:bg-blue-900"}`}>
+            {isUser ? <User size={16} className="text-white" /> : <Bot size={18} className="text-blue-600 dark:text-blue-300" />}
+        </div>
+
+        {/* Bubble */}
+        <div
+          className={`px-4 py-3 rounded-2xl shadow-sm text-sm md:text-base overflow-hidden
+            ${isUser
+              ? "bg-purple-600 text-white rounded-tr-sm"
+              : "bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-200 rounded-tl-sm"
+            }`}
+        >
+          {isUser ? (
+            <p className="whitespace-pre-wrap leading-relaxed">{msg.text}</p>
+          ) : (
+            <div className="prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed prose-pre:bg-gray-100 dark:prose-pre:bg-gray-900/50 prose-pre:p-2 prose-pre:rounded-lg">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  a: ({ children, href }) => (
+                    <Link
+                      target="_blank"
+                      href={href || "/roadmap"}
+                      className="inline-flex items-center gap-1 text-blue-500 hover:text-blue-600 hover:underline font-medium break-all"
+                      rel="noopener noreferrer"
+                    >
+                      {children}
+                    </Link>
+                  ),
+                  ul: ({children}) => <ul className="list-disc pl-4 space-y-1 my-2">{children}</ul>,
+                  ol: ({children}) => <ol className="list-decimal pl-4 space-y-1 my-2">{children}</ol>,
+                  li: ({children}) => <li className="pl-1">{children}</li>
+                }}
+              >
+                {msg.text}
+              </ReactMarkdown>
+            </div>
+          )}
+        </div>
+      </div>
     </motion.div>
   );
 }

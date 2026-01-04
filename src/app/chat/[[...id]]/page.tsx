@@ -5,7 +5,6 @@ import { useSession } from "next-auth/react";
 import { createChatSession, saveChatMessage, updateChatSessionTitle } from "@/lib/chatStorage";
 import { useChatSessions } from "@/hooks/useChatSessions";
 import { useChatMessages } from "@/hooks/useChatMessages";
-import { useAutoScroll } from "@/hooks/useAutoScroll";
 import Header from "@/components/layout/Header";
 import ChatSidebar from "@/components/chat/chatSidebar";
 import ChatWindow from "@/components/chat/ChatWindow";
@@ -25,7 +24,7 @@ export default function ChatPage() {
   const router = useRouter();
   const recentConversations = useChatSessions(userId);
   const { messages, loading, setMessages } = useChatMessages(userId, id);
-  const chatEndRef = useAutoScroll([messages, isTyping]);
+
 
   const startNewChat = () => {
     router.push("/chat");
@@ -93,7 +92,7 @@ export default function ChatPage() {
 
   return (
     <div className={`transition-colors duration-500 ${darkMode ? "bg-gradient-to-br from-gray-900 via-gray-800 to-black text-gray-200" : "bg-gradient-to-br from-blue-50 to-purple-50"}`}>
-      <div className=" ml-10 flex h-screen">
+      <div className=" md:ml-10 flex h-screen">
         <Header className="pl-8 lg:pl-0" />
         <ChatSidebar
           darkMode={darkMode}
@@ -101,12 +100,15 @@ export default function ChatPage() {
           currentSessionId={currentSessionId}
           startNewChat={startNewChat}
         />
-        <div className="flex flex-col flex-1 p-4 !pt-20 sm:p-6">
-          <motion.div className="flex-1 overflow-y-auto p-4 rounded-2xl flex flex-col" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+        <div className="flex flex-col flex-1 pt-16">
+          <motion.div className="flex-1 overflow-y-auto  rounded-2xl flex flex-col" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <ChatWindow messages={messages} loading={loading} isTyping={isTyping} />
-            <div ref={chatEndRef} />
+            
           </motion.div>
+          <div className="mx-4 mb-2 md:mb-4 md:mx-6 lg:mx-8">
+
           <ChatInput input={input} setInput={setInput} handleSend={handleSend} darkMode={darkMode} isTyping={isTyping} />
+          </div>
         </div>
       </div>
     </div>

@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import MessageBubble from "./MessageBubble";
 import TypingIndicator from "./TypingIndicator";
 import { ChatMessage } from "@/types/chat";
+import { ScrollArea, ScrollBar } from "../ui/scroll-area";
+import { useAutoScroll } from "@/hooks/useAutoScroll";
 
 export default function ChatWindow({
   messages,
@@ -14,6 +16,7 @@ export default function ChatWindow({
   loading: boolean;
   isTyping: boolean;
 }) {
+    const chatEndRef = useAutoScroll([messages, isTyping]);
   if (loading) {
     return (
       <div className="m-auto text-center text-gray-500">
@@ -46,11 +49,13 @@ export default function ChatWindow({
   }
 
   return (
-    <>
+    <ScrollArea className="p-4 ">
       {messages.map((msg, idx) => (
         <MessageBubble key={idx} msg={msg} />
       ))}
       {isTyping && <TypingIndicator />}
-    </>
+      <div ref={chatEndRef} />
+      <ScrollBar  className="w-3 [&>div]:!bg-zinc-500 [&>div]:hover:!bg-zinc-600" />
+    </ScrollArea>
   );
 }
