@@ -1,39 +1,42 @@
+// components/dashboard/quickActions.tsx
 "use client"
 import { Bot, Briefcase, FileText, User } from 'lucide-react'
-import Link from 'next/link'
-import React from 'react'
-import {motion} from 'framer-motion'
 import { useRouter } from 'nextjs-toploader/app'
+import React from 'react'
+import { motion } from 'framer-motion'
 
 export default function QuickActions() {
     const router = useRouter()
-  return (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-white rounded-xl p-6 shadow-lg"
-            >
-              <h2 className='text-xl font-semibold text-gray-900 mb-6'>Quick Actions</h2>
-              <div className="flex gap-3 flex-wrap">
-                <Link href="/jobs" className="flex items-center gap-2 p-2 px-4 rounded-xl bg-blue-500 text-white text-sm font-semibold hover:scale-105 shadow-md hover:shadow-xl transition-all duration-200">
-                  <Briefcase size={16} />
-                  Explore Jobs
-                </Link>
-                <button onClick={e=>router.push('/assessment')} className="flex items-center gap-2 p-2 px-4 rounded-xl border border-blue-400 text-blue-600 bg-blue-50 text-sm font-medium hover:bg-blue-100 hover:scale-105 transition-all duration-200">
-                  <User size={16} />
-                  Update Profile
-                </button>
-                <button onClick={e=>router.push('/roadmap')} className="flex items-center gap-2 p-2 px-4 rounded-xl border border-blue-400 text-blue-600 bg-blue-50 text-sm font-medium hover:bg-blue-100 hover:scale-105 transition-all duration-200">
-                  <FileText size={16} />
-                  View Roadmaps
-                </button>
-                <button onClick={e=>router.push('/chat')} className="flex items-center gap-2 p-2 px-4 rounded-xl border border-blue-400 text-blue-600 bg-blue-50 text-sm font-medium hover:bg-blue-100 hover:scale-105 transition-all duration-200">
-                  <Bot size={16} />
-                  Chat with AI Mentor
-                </button>
-              </div>
+    
+    const actions = [
+        { icon: Briefcase, label: "Jobs", color: "text-blue-600", bg: "bg-blue-50", href: "/jobs" },
+        { icon: User, label: "Profile", color: "text-purple-600", bg: "bg-purple-50", href: "/assessment" },
+        { icon: FileText, label: "Roadmaps", color: "text-amber-600", bg: "bg-amber-50", href: "/roadmap" },
+        { icon: Bot, label: "AI Mentor", color: "text-emerald-600", bg: "bg-emerald-50", href: "/chat" },
+    ]
 
-            </motion.div>
-  )
+    return (
+        <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-3xl p-6 shadow-xl shadow-slate-200/40 border border-slate-100 pb-12"
+        >
+            <h2 className='text-sm font-bold text-gray-400 uppercase tracking-wider mb-4'>Quick Actions</h2>
+           <div className="grid grid-cols-2 gap-3 h-full">
+    {actions.map((action, i) => (
+        <button
+            key={i}
+            onClick={() => router.push(action.href)}
+          
+            className="w-full h-full flex flex-col items-center justify-center gap-2 p-3 rounded-2xl hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-all duration-200 group"
+        >
+            <div className={`p-2.5 rounded-xl ${action.bg} ${action.color} group-hover:scale-110 transition-transform`}>
+                <action.icon size={20} />
+            </div>
+            <span className="text-xs font-semibold text-gray-700">{action.label}</span>
+        </button>
+    ))}
+</div>
+        </motion.div>
+    )
 }

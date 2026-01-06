@@ -1,13 +1,14 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { ArrowRight, MessageSquare, Map, CheckCircle2, Zap, CalendarCheck, BookOpen, BarChart3, Lock, ShieldCheck, BrainCircuit, Trash2, MoreHorizontal, LayoutDashboard, Youtube, Trophy, LineChart, RefreshCw, Briefcase, GraduationCap } from 'lucide-react'
+import { MessageSquare, Map, CheckCircle2, Zap, CalendarCheck, BookOpen,  Lock, ShieldCheck, BrainCircuit, Trash2,  LayoutDashboard, Youtube, Trophy, LineChart, RefreshCw, Briefcase, GraduationCap } from 'lucide-react'
 import Link from 'next/link'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import Image from 'next/image'
+import AnnouncementBar from '@/components/ui/announcementBar'
 
-// Smooth Fade In Animation
+
 const fadeIn = {
   hidden: { opacity: 0, y: 30 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
@@ -19,17 +20,12 @@ const stagger = {
 
 export default function HomePage() {
   return (
-    // Added overflow-x-hidden to prevent horizontal scrollbar from animations/blobs
     <div className="min-h-screen bg-gradient-to-b to-purple-50 from-white via-indigo-50 text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-900 overflow-x-hidden">
+      <AnnouncementBar />
       <Header />
-      
-      {/* 1. HERO SECTION */}
-      <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-32 w-full">
+      <section className="relative pt-20 pb-20 lg:pt-[9.5rem] lg:pb-32 w-full">
         <div className="absolute inset-0 z-10 h-full w-full bg-white overflow-hidden">
-      {/* 1. The Stronger Grid (Graph Paper Lines instead of Dots) */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080801a_1px,transparent_1px),linear-gradient(to_bottom,#8080801a_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-      
-      {/* 2. The Center Mask (Fades the grid out behind the text so it's readable) */}
       <div className="absolute inset-0 bg-white [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,transparent_70%,black)]"></div>
 
       {/* 3. The "Aurora" Top Glow (Adds premium depth, connects to your purple brand) */}

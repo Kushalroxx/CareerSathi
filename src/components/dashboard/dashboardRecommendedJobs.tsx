@@ -1,51 +1,63 @@
+// components/dashboard/dashboardRecommendedJobs.tsx
 "use client"
 import React, { useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { JobArray, JobType } from '@/types/jobsType'
 import JobCard from '../jobs/jobCard'
 import { recommendedJobsAtom } from '@/lib/atom'
 import { useAtom } from 'jotai'
+import { Sparkles } from 'lucide-react'
 
 export default function DashboardRecommendedJobs() {
     const [jobs, setJobs] = useAtom(recommendedJobsAtom)
     const [loading, setLoading] = React.useState(false)
+
+    // ... fetch logic remains same ...
     const getRecommendedJobs = async() => {
-        try {
-          if (jobs) {
-            return
-          }
-          setLoading(true)
-            const response = await fetch('/api/jobs/recommended', {
-                method: 'GET',
-            })
-            const data = await response.json()
-            setJobs(data.jobs)
-        } catch (error) {
-            
-        }finally {
-            setLoading(false)
+            try {
+              if (jobs) {
+                return
+              }
+              setLoading(true)
+                const response = await fetch('/api/jobs/recommended', {
+                    method: 'GET',
+                })
+                const data = await response.json()
+                setJobs(data.jobs)
+            } catch (error) {
+                
+            }finally {
+                setLoading(false)
+            }
         }
-    }
-    useEffect(() => {
-      getRecommendedJobs()
-    },[])
+        useEffect(() => {
+          getRecommendedJobs()
+        },[])
+
   return (
      <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className=" bg-white rounded-xl h-full p-6 shadow-lg"
-            >
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">Recommended Jobs</h2>
-              <div className="space-y-4 overflow-y-auto max-h-[24rem]">
-                {!loading?!!jobs ?jobs.map((item, index) => (
-                  <JobCard key={index} job={item} index={index} />
-                )): <div className='h-full flex justify-center items-center'><p className="text-gray-600">No recommended jobs found.</p></div>:(
-                  <div className="h-[20rem] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-      </div>
-                )}
-              </div>
-            </motion.div>
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="bg-white rounded-3xl p-6 shadow-xl shadow-slate-200/40 border border-slate-100"
+    >
+        <div className="flex items-center gap-2 mb-6">
+            <div className="p-2 bg-indigo-100 rounded-lg text-indigo-600"><Sparkles size={20} /></div>
+            <h2 className="text-lg font-bold text-gray-900">Recommended Jobs</h2>
+        </div>
+
+        <div className="space-y-4 max-h-[24rem] overflow-y-auto pr-2 custom-scrollbar">
+        {!loading ? !!jobs && jobs.length > 0 ? (
+            jobs.map((item, index) => <JobCard key={index} job={item} index={index} />)
+        ) : (
+            <div className='py-8 text-center text-gray-400 bg-slate-50 rounded-xl border border-dashed border-slate-200'>
+                <p>No jobs found for your profile.</p>
+            </div>
+        ) : (
+            <div className="py-12 flex items-center justify-center">
+                <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        )}
+        </div>
+    </motion.div>
   )
 }

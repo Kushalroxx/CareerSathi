@@ -1,59 +1,57 @@
 export const timeGreetings = [
   { start: 0, end: 4, messages: [
-    "Burning the midnight oil",
-    "Still grinding",
-    "Late-night hustle mode"
+    "Still awake",
+    "Late night session",
+    "Working past midnight"
   ]},
   { start: 4, end: 12, messages: [
     "Good morning",
-    "Rise and shine 🌅",
-    "Fresh start, new goals"
+    "Morning check-in",
+    "New day, fresh focus"
   ]},
   { start: 12, end: 17, messages: [
     "Good afternoon",
-    "Stay focused 💡",
-    "Push through, you're halfway"
+    "Midday check-in",
+    "Focus hours"
   ]},
   { start: 17, end: 21, messages: [
     "Good evening",
-    "Wrap it up strong ✨",
-    "Time to slow down"
+    "Evening review",
+    "Wrapping up the day"
   ]},
   { start: 21, end: 24, messages: [
-    "Hello night owl 🌙",
-    "Quiet night, clear mind",
-    "Grinding after hours"
+    "Late evening",
+    "Quiet hours",
+    "Night check-in"
   ]},
 ];
-
 export const timeSupportTexts = [
   { start: 0, end: 4, messages: [
-    "The night is yours 🌌",
-    "Deep focus zone",
-    "Perfect time to plan ahead"
+    "Keep this session short and intentional",
+    "Good time for planning, not heavy work",
+    "If you're tired, stop — progress needs rest"
   ]},
   { start: 4, end: 12, messages: [
-    "Kickstart your day 🚀",
-    "Check today’s priorities",
-    "Set the pace early"
+    "Review today’s top priority",
+    "Start with the smallest actionable task",
+    "Momentum is built early"
   ]},
   { start: 12, end: 17, messages: [
-    "Keep the momentum going",
-    "Prime focus hours 🔥",
-    "Small wins add up"
+    "This is a good window for deep work",
+    "Focus on one task until it's done",
+    "Avoid switching — finish something"
   ]},
   { start: 17, end: 21, messages: [
-    "Review what you’ve achieved",
-    "Close out pending tasks",
-    "Evening reset time"
+    "Wrap up unfinished tasks",
+    "Review what you completed today",
+    "Prepare tomorrow’s first task"
   ]},
   { start: 21, end: 24, messages: [
-    "Wind down or power through",
-    "Get ready for tomorrow",
-    "Balance work and rest 🌙"
+    "Light work only — don’t overload yourself",
+    "Plan tomorrow instead of pushing now",
+    "Rest is part of progress"
   ]},
 ];
-
 export const getRandomGreeting= ()=>{
    const hour = new Date().getHours();
    console.log(hour);

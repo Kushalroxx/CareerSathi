@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X, User, LogIn, Users, Sparkles } from 'lucide-react'
 import { useSession, signOut } from 'next-auth/react'
 import Image from 'next/image'
+import { Badge } from '../ui/badge'
 
 export default function Header({ className }: { className?: string }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -79,7 +80,7 @@ export default function Header({ className }: { className?: string }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 lg:h-20">
           {/* Logo */}
-         <Link href="/" className={`${className} flex items-center -space-x-1 group`}>
+         <Link href="/" className={`${className} flex items-center -space-x-1 group relative`}>
   <div className="w-9 h-9 relative rounded-lg overflow-hidden group-hover:scale-110 transition-transform duration-300">
     <Image
       src="/careerSathi.png"
@@ -89,6 +90,9 @@ export default function Header({ className }: { className?: string }) {
     />
   </div>
   <span className="md:text-2xl text-xl font-bold font-display ">CareerSathi</span>
+<Badge className='absolute bottom-0 -right-10 bg-transparent hover:bg-transparent rounded-full' variant={"secondary"}>
+  Beta
+</Badge>
 </Link>
 
           {/* Desktop Nav */}

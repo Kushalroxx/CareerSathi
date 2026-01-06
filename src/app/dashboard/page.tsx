@@ -8,60 +8,63 @@ import { authOptions } from '@/lib/auth'
 import { getServerSession } from 'next-auth'
 import { prisma } from '@/lib/prisma'
 import DashboardRoadmapCard from '@/components/dashboard/dashboardRoadmapCard'
-import DashboardRecommendedJobs from '@/components/dashboard/dashboardRecommendedJobs'
 import Footer from '@/components/layout/Footer'
-
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) {
-    return <div className='text-red-500 flex justify-center items-center h-screen'>no session</div>
+    return <div className='text-red-500 flex justify-center items-center h-screen'>Session expired. Please login.</div>
   }
+  
   try {
     const roadmaps = await prisma.roadmap.findMany({
-      where: {
-        userId: session.user.id
-      },
-      include: {
-        skillsToLearn: true,
-        recommendedProjects: true
-      }
+      where: { userId: session.user.id },
+      include: { skillsToLearn: true, recommendedProjects: true }
     })
-    return (
-    <>
-      <Header />
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-6 py-20 lg:py-24">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <WelconeText />
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className="flex flex-col gap-6 ">
-            <UserProgressDashboard />
-              <QuickActions />
-            </div>
-            <div className="grid grid-cols-1 gap-6 ">
-             <TodaysGoal />
-            <DailyQuestions />
-            </div>
 
-            {/* Goals + Jobs */}
-              {/* Today's Goal */}
-          {/* Quick Actions */}
+    return (
+      <div className="min-h-screen flex flex-col bg-slate-50/50">
+        <Header />
+        
+        <main className="flex-1 pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-[1600px] mx-auto space-y-6">
+            
+            <WelconeText />
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+              <div className="lg:col-span-8 space-y-6">
+                
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <TodaysGoal />
+                  <UserProgressDashboard />
+                </div>
+
+                <DashboardRoadmapCard roadmaps={roadmaps} />
+
+              </div>
+
+              <div className="lg:col-span-4 space-y-6 flex flex-col h-full">
+                <QuickActions />
+                <div className="flex-1 min-h-[500px]"> 
+                  <DailyQuestions />
+                </div>
+              </div>
+            </div>
           </div>
-          
-          {/* Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Career Roadmap */}
-            <DashboardRoadmapCard roadmaps={roadmaps} />
-            {/* Sidebar */}
-           <DashboardRecommendedJobs />
-          </div>
-        </div>
+        </main>
+        
+        <Footer />
       </div>
-      <Footer />
-    </>
-  )
+    )
   } catch (error) {
-    throw error
+    console.error(error)
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
+        <h2 className="text-xl font-bold text-red-600">Unable to load dashboard</h2>
+        <p className="text-slate-500">Please try refreshing the page.</p>
+      </div>
+    )
   }
 }
