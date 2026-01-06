@@ -8,6 +8,7 @@ import { motion } from 'framer-motion'
 import { Sparkles, ArrowLeft, Users, Target, Brain } from 'lucide-react'
 import { FcGoogle } from 'react-icons/fc'
 import { FaLinkedin } from 'react-icons/fa'
+import Image from 'next/image'
 
 export default function SignUpPage() {
   const [isLoading, setIsLoading] = useState(false)
@@ -60,9 +61,14 @@ if (status==="authenticated") {
           {/* Header */}
           <div className="text-center mb-8">
             <div className="flex items-center justify-center mb-4">
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                <Sparkles className="w-6 h-6 text-white" />
-              </div>
+               <div className="w-9 h-9 relative rounded-lg overflow-hidden group-hover:scale-110 transition-transform duration-300">
+                                               <Image
+                                                 src="/careerSathi.png"
+                                                 alt="CareerSathi Logo"
+                                                 fill
+                                                 className="object-cover"
+                                               />
+                                             </div>
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Join CareerSathi</h1>
             <p className="text-gray-600">Start your career journey with AI-powered guidance</p>
@@ -120,10 +126,7 @@ if (status==="authenticated") {
                 <Target className="w-4 h-4 text-purple-500 mr-2 flex-shrink-0" />
                 <span>Personalized learning roadmaps</span>
               </div>
-              <div className="flex items-center">
-                <Users className="w-4 h-4 text-pink-500 mr-2 flex-shrink-0" />
-                <span>Industry insights for Indian market</span>
-              </div>
+              
             </div>
           </div>
 
@@ -148,7 +151,7 @@ if (status==="authenticated") {
           transition={{ duration: 0.6, delay: 0.3 }}
           className="mt-8 text-center text-sm text-gray-500"
         >
-          <p>Join 50,000+ students • Secure & Private • Free to start</p>
+          <p> Secure & Private • Free to start</p>
         </motion.div>
       </div>
     </div>

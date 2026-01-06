@@ -8,6 +8,7 @@ import { motion } from 'framer-motion'
 import { Sparkles, ArrowLeft } from 'lucide-react'
 import { FcGoogle } from 'react-icons/fc'
 import { FaLinkedin } from 'react-icons/fa'
+import Image from 'next/image'
 
 export default function SignInPage() {
   const [isLoading, setIsLoading] = useState(false)
@@ -60,9 +61,14 @@ export default function SignInPage() {
           {/* Header */}
           <div className="text-center mb-8">
             <div className="flex items-center justify-center mb-4">
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                <Sparkles className="w-6 h-6 text-white" />
-              </div>
+              <div className="w-9 h-9 relative rounded-lg overflow-hidden group-hover:scale-110 transition-transform duration-300">
+                                 <Image
+                                   src="/careerSathi.png"
+                                   alt="CareerSathi Logo"
+                                   fill
+                                   className="object-cover"
+                                 />
+                               </div>
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
             <p className="text-gray-600">Sign in to continue your career journey</p>
@@ -120,11 +126,19 @@ export default function SignInPage() {
                 <div className="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
                 Personalized learning roadmaps
               </div>
-              <div className="flex items-center">
-                <div className="w-2 h-2 bg-pink-500 rounded-full mr-2"></div>
-                Industry insights for Indian market
-              </div>
+              
             </div>
+          </div>
+          <div className="text-center mt-6">
+            <p className="text-gray-600">
+               New to CareerSathi?{' '}
+              <Link
+                href="/auth/signup"
+                className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
+              >
+                Sign up here
+              </Link>
+            </p>
           </div>
         </motion.div>
 
@@ -135,7 +149,7 @@ export default function SignInPage() {
           transition={{ duration: 0.6, delay: 0.3 }}
           className="mt-8 text-center text-sm text-gray-500"
         >
-          <p>Secure authentication • Privacy protected • Trusted by 50,000+ students</p>
+          <p>Secure authentication • Privacy protected </p>
         </motion.div>
       </div>
     </div>
