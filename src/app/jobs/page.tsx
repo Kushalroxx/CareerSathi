@@ -38,7 +38,7 @@ export default async function page({ searchParams }: { searchParams: any }) {
                         <Header />
                         <div className='mx-auto max-w-6xl'>
                             <JobsHeader />
-                            <JobsTrendingCatagory querry={querry} />
+                            {/* <JobsTrendingCatagory querry={querry} /> */}
                             <JobsRecommendation />
                         </div>
                     </div>

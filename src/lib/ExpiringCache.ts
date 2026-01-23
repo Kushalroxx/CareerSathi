@@ -1,55 +1,48 @@
+import { createClient, RedisClientType } from 'redis';
+
 const DEFAULT_TTL = 1000 * 60 * 60 * 24;
 
-interface CacheEntry<T> {
-  value: T;
+interface CacheEntry {
+  value: any;
   expiry: number;
 }
 export class ExpiringCache {
   private static instance: ExpiringCache;
-  private cache: Map<string, CacheEntry<any>>;
+  private cache: RedisClientType;
 
   private constructor() {
-    this.cache = new Map<string, CacheEntry<any>>();
+    this.cache = createClient({
+    username: 'default',
+    password: process.env.REDIS_PASSWORD || '',
+    socket: {
+        host: process.env.REDIS_URL || '',
+        port: 12811
+    }
+});
+this.cache.on('error', (err) => console.error('Redis Client Error', err));
   }
-
-  public static getInstance(): ExpiringCache {
+   public static async getInstance(): Promise<ExpiringCache> {
     if (!ExpiringCache.instance) {
       ExpiringCache.instance = new ExpiringCache();
+      await ExpiringCache.instance.cache.connect();
     }
     return ExpiringCache.instance;
   }
-  public set<T>(key: string, value: T, ttl_ms: number = DEFAULT_TTL): void {
-    const now = Date.now();
-    const expiry = now + ttl_ms;
-    const entry: CacheEntry<T> = { value, expiry };
-    this.cache.set(key, entry);
-    
-    setTimeout(() => {
-      const currentEntry = this.cache.get(key);
-      if (currentEntry && currentEntry.expiry === expiry) {
-        this.cache.delete(key);
-      }
-    }, ttl_ms);
+  public async set(key: string, value: any, ttl_ms: number = DEFAULT_TTL): Promise<void> {
+    await this.cache.set(key,JSON.stringify(value),{PX:ttl_ms});
   }
-  public get<T>(key: string): T | undefined {
-    const entry = this.cache.get(key);
-
-    if (!entry) {
-      return undefined;
+  public async get(key: string):Promise<any|undefined>  {
+    const value = await this.cache.get(key);
+    if (value) {
+      return JSON.parse(value);
     }
-
-    const now = Date.now();
-    
-    if (now > entry.expiry) {
-      this.cache.delete(key);
-      return undefined;
-    }
-    return entry.value as T;
+    return undefined;
   }
-  public delete(key: string): void {
-    this.cache.delete(key);
+  public async delete(key: string): Promise<boolean> {
+    const value = await this.cache.del(key);
+    return value > 0;
   }
-  public clear(): void {
-    this.cache.clear();
+  public async clear(): Promise<void> {
+    await this.cache.flushDb();
   }
 }

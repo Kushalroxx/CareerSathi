@@ -4,7 +4,6 @@ import { VertexAI } from "@google-cloud/vertexai";
 import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
-import { Result } from "postcss";
 
 export async function POST(req: Request) {
   try {
@@ -24,6 +23,9 @@ export async function POST(req: Request) {
     const vertexAI = new VertexAI({
       project: process.env.GOOGLE_PROJECT_ID,
       location: process.env.LOCATION || "us-central1",
+      googleAuthOptions:{
+        credentials:JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS || "{}")
+      }
     });
 
     const geminiModel = vertexAI.getGenerativeModel({ model: "gemini-2.5-flash" });
@@ -192,9 +194,82 @@ Format:
 
   } catch (err) {
     console.error("Error generating career simulation (All retries failed):", err);
-    return NextResponse.json({
-      error: `Failed to generate simulation after multiple attempts. Please try again.`,
-      details: (err as any).message ?? null
-    }, { status: 500 });
+    // const fallbackImageBase64 = "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=1000&auto=format&fit=crop";
+
+    // const fallbackResponse = {
+    //   careerRole: "Fullstack Developer",
+    //   overview: "You are the Swiss Army knife of the tech world, balancing user-centric UI with bulletproof server logic. It's not just about code; it's about solving problems end-to-end.",
+    //   average_daily_routine: "Your day starts at 9:30 AM with a 15-minute standup, syncing with the product manager and QA. By 10:00 AM, you're deep in VS Code, stitching a React frontend to a Node.js API. After a quick lunch, you spend the afternoon debugging a tricky database query and reviewing a junior dev's pull request. The day ends updating Jira tickets and deploying a hotfix to staging.",
+    //   core_soft_skills: ["Adaptability", "System Thinking"],
+    //   primary_image: fallbackImageBase64,
+    //   scenarios: [
+    //     {
+    //       id: 1,
+    //       title: "The Deadline vs. Debt Dilemma",
+    //       description: "Marketing wants the new dashboard feature launched by Friday for a promo event. You know the current code is 'spaghetti' and adding this feature without refactoring will break the reporting tool.",
+    //       skill_focus: "Negotiation & Technical Debt Management",
+    //       stakeholder_persona: {
+    //         role: "Product Manager (Sarah)",
+    //         initial_message: "We absolutely need this live by Friday or we lose the ad spend. Can we just patch it in?"
+    //       },
+    //       choices: [
+    //         {
+    //           choice_id: 1,
+    //           action: "Agree to patch it in ('Quick & Dirty').",
+    //           evaluation_hint: "<b>Reality Check:</b> You hit the deadline, but the reporting tool crashed on Monday.<br><b>Growth Opportunity:</b> Assertiveness<br><b>Micro-Task:</b> Learn to say 'Yes, but here is the risk.'<br><b>Inspiration:</b> 'Technical debt is like a loan; eventually you pay interest.'",
+    //           impact_score: 40
+    //         },
+    //         {
+    //           choice_id: 2,
+    //           action: "Refuse. Tell her it takes 2 weeks, period.",
+    //           evaluation_hint: "<b>Reality Check:</b> Marketing canceled the campaign. You are seen as a blocker, not a partner.<br><b>Growth Opportunity:</b> Empathy<br><b>Micro-Task:</b> Always offer an alternative solution, not just a 'No'.<br><b>Inspiration:</b> 'Code serves the business, not the other way around.'",
+    //           impact_score: 30
+    //         },
+    //         {
+    //           choice_id: 3,
+    //           action: "Propose a 'Feature Flag' release with reduced scope.",
+    //           evaluation_hint: "<b>Reality Check:</b> Sarah agreed. You shipped the UI, disabled the risky backend part, and bought time to refactor next week.<br><b>Growth Opportunity:</b> Strategic Compromise<br><b>Micro-Task:</b> Research 'Feature Toggles' for safer deployments.<br><b>Inspiration:</b> 'Perfect is the enemy of done.'",
+    //           impact_score: 95
+    //         }
+    //       ]
+    //     },
+    //     {
+    //       id: 2,
+    //       title: "The Blame Game",
+    //       description: "The production site is throwing 500 errors. The frontend team says the API is broken. The backend team says the frontend is sending bad data. You are the only one who knows both stacks.",
+    //       skill_focus: "Leadership & Debugging",
+    //       stakeholder_persona: {
+    //         role: "CTO (David)",
+    //         initial_message: "Site is down. Everyone is pointing fingers. I need this fixed NOW."
+    //       },
+    //       choices: [
+    //         {
+    //           choice_id: 1,
+    //           action: "Pick a side and defend the backend logic.",
+    //           evaluation_hint: "<b>Reality Check:</b> You wasted 2 hours proving you were right while users couldn't log in.<br><b>Growth Opportunity:</b> Ownership<br><b>Micro-Task:</b> Stop arguing, start reading logs.<br><b>Inspiration:</b> 'Egos don't fix bugs.'",
+    //           impact_score: 20
+    //         },
+    //         {
+    //           choice_id: 2,
+    //           action: "Jump on a call, open the logs, and trace the request ID.",
+    //           evaluation_hint: "<b>Reality Check:</b> You found a typo in the JSON payload within 10 minutes. Crisis averted.<br><b>Growth Opportunity:</b> Crisis Management<br><b>Micro-Task:</b> Practice reading server logs (AWS CloudWatch/Sentry).<br><b>Inspiration:</b> 'Be the calmest person in the room.'",
+    //           impact_score: 100
+    //         },
+    //         {
+    //           choice_id: 3,
+    //           action: "Quietly fix the code without telling anyone.",
+    //           evaluation_hint: "<b>Reality Check:</b> It's fixed, but nobody learned what went wrong. It will happen again.<br><b>Growth Opportunity:</b> Communication<br><b>Micro-Task:</b> Write a 'Post-Mortem' incident report.<br><b>Inspiration:</b> 'Mistakes are tuition for learning.'",
+    //           impact_score: 60
+    //         }
+    //       ]
+    //     }
+    //   ],
+    //   related_roles: [
+    //     { role: "DevOps Engineer", reason: "Focuses more on the deployment pipeline and servers." },
+    //     { role: "Product Manager", reason: "Uses technical knowledge to guide product strategy." }
+    //   ]
+    // };
+
+    return NextResponse.json( { status: 200 });
   }
 }

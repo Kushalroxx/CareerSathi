@@ -47,9 +47,9 @@ export default function JobsRecommendation() {
           </div>
         ) :
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {!!jobs ? jobs.map((item, index) => (
+            {!!jobs && jobs.length>0 ? jobs.map((item, index) => (
               <JobCard key={index} job={item} index={index} />
-            )) : <div className='h-full flex justify-center items-center'><p className="text-gray-600">No recommended jobs found.</p></div>}
+            )) : <div className=''><p className="text-gray-600">No recommended jobs found.</p></div>}
           </div>
         }
       </motion.div>

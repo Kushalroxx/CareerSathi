@@ -15,8 +15,8 @@ export async function POST(req:Request) {
         if (!session?.user?.id) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
         }
-        if (ExpiringCache.getInstance().get<string>(`${session.user.id}-${text.trim()}`)) {
-            const cachedResponse = ExpiringCache.getInstance().get<string>(`${session.user.id}-${text.trim()}`)
+        if (await (await ExpiringCache.getInstance()).get(`${session.user.id}-${text.trim()}`)) {
+            const cachedResponse = await (await ExpiringCache.getInstance()).get(`${session.user.id}-${text.trim()}`)
             return NextResponse.json({ text: cachedResponse }, { status: 200 })
         }
  const prompt = `
@@ -69,7 +69,7 @@ Example: "A dedicated student can confidently master this in 3-4 focused weeks. 
 4.  You MUST generate this plan *only* from your internal knowledge. Do NOT use any external tools or search functions.
 `;
         const res = await askVertex(prompt)
-        ExpiringCache.getInstance().set<string>(`${session.user.id}-${text.trim()}`, res);
+        await(await ExpiringCache.getInstance()).set(`${session.user.id}-${text.trim()}`, res);
         return NextResponse.json({text: res}, { status: 200 })
     } catch (error) {
         return NextResponse.json({ error: "Internal server error" }, { status: 500 })
