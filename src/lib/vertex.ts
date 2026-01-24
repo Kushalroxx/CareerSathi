@@ -65,6 +65,7 @@ export async function getValidToken() {
   }
   const auth = new GoogleAuth({
     scopes: ["https://www.googleapis.com/auth/cloud-platform"],
+    credentials:JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS || "{}")
   });
   const client = (await auth.getClient()) as OAuth2Client; 
   const res = await client.getAccessToken();

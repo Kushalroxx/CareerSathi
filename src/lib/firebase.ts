@@ -5,12 +5,13 @@ import { getFirestore } from "firebase/firestore";
 
 // Make sure you add these to .env.local
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN!,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET!,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID!,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
+  apiKey: "AIzaSyAG4_a-soOgFq5Hk7yMmiVbeHSSxVdpkmc",
+  authDomain: "career-sathi-bot.firebaseapp.com",
+  projectId: "career-sathi-bot",
+  storageBucket: "career-sathi-bot.firebasestorage.app",
+  messagingSenderId: "131929273763",
+  appId: "1:131929273763:web:ca5f609564cbb8b0169616",
+  measurementId: "G-M958F5SJH6",
 };
 
 // Reuse app if already initialized (important for Next.js hot reload)

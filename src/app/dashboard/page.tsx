@@ -47,7 +47,7 @@ export default async function DashboardPage() {
 
               <div className="lg:col-span-4 space-y-6 flex flex-col h-full">
                 <QuickActions />
-                <div className="flex-1 min-h-[500px]"> 
+                <div className="flex-1 min-h-[500px] max-h-[700px]"> 
                   <DailyQuestions />
                 </div>
               </div>
