@@ -69,8 +69,8 @@ export default function CareerAssessmentPage({existedForm}: {existedForm?: Asses
         throw new Error(message);
       }
       await update()
-      const data = await res.json();
-      setCareerPaths(data.careerPaths);
+      setSubmitted(true);
+      router.push("/chat")
     } catch (err: any) {
       console.error(err);
       setError(err.message || "Submission failed. Please try again.");
@@ -88,14 +88,6 @@ export default function CareerAssessmentPage({existedForm}: {existedForm?: Asses
     return (
       <CareerLoader/>
     )
-  }
-  if (careerPaths.length>0) {
-    return(
-    <>
-    <Header/>
-    <CareerRecommendations careerPaths={careerPaths}/>
-    <Footer/>
-    </>)
   }
   return (
         <>

@@ -16,7 +16,7 @@ export class ExpiringCache {
     password: process.env.REDIS_PASSWORD || '',
     socket: {
         host: process.env.REDIS_URL || '',
-        port: 12811
+        port: Number(process.env.REDIS_PORT || 14694)
     }
 });
 this.cache.on('error', (err) => console.error('Redis Client Error', err));

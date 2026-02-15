@@ -45,48 +45,48 @@ export async function POST(request: NextRequest) {
       }
     },
   });
-   const prompt = `
-You are a 'JSON Career Recommender' service. Your one and only function is to take user data and return a single, valid JSON object.
+//    const prompt = `
+// You are a 'JSON Career Recommender' service. Your one and only function is to take user data and return a single, valid JSON object.
 
-### CRITICAL OUTPUT RULES:
-1. You MUST return ONLY the valid JSON object.
-2. DO NOT include any text, explanations, or conversational chat (like "Here is the JSON...") before or after the JSON.
-3. DO NOT wrap the JSON in markdown blocks (\`\`\`json).
-4. All strings inside the JSON must use double quotes. Any internal double quotes MUST be escaped (e.g., \\"example\\").
-5. The output JSON MUST match this exact structure:
-   {
-     "careerPaths": [
-       { "name": "Software Engineer", "description": "Work on **applications**, systems, or platforms." },
-       { "name": "Data Scientist", "description": "Analyze data to uncover *insights* and build models." }
-     ]
-   }
+// ### CRITICAL OUTPUT RULES:
+// 1. You MUST return ONLY the valid JSON object.
+// 2. DO NOT include any text, explanations, or conversational chat (like "Here is the JSON...") before or after the JSON.
+// 3. DO NOT wrap the JSON in markdown blocks (\`\`\`json).
+// 4. All strings inside the JSON must use double quotes. Any internal double quotes MUST be escaped (e.g., \\"example\\").
+// 5. The output JSON MUST match this exact structure:
+//    {
+//      "careerPaths": [
+//        { "name": "Software Engineer", "description": "Work on **applications**, systems, or platforms." },
+//        { "name": "Data Scientist", "description": "Analyze data to uncover *insights* and build models." }
+//      ]
+//    }
 
-### CONTENT GUIDELINES:
-1. Recommend up to 6 suitable career paths based on the User Data.
-2. "name": A short, official career title.
-3. "description": A **single, concise sentence** explaining the career. (This fixes the "overwhelming" problem).
-4. "description" MUST include simple Markdown (like **bold** or *italics*) to highlight one or two key concepts.
+// ### CONTENT GUIDELINES:
+// 1. Recommend up to 6 suitable career paths based on the User Data.
+// 2. "name": A short, official career title.
+// 3. "description": A **single, concise sentence** explaining the career. (This fixes the "overwhelming" problem).
+// 4. "description" MUST include simple Markdown (like **bold** or *italics*) to highlight one or two key concepts.
 
-### User Data:
-${JSON.stringify(assessment)}
-`;
+// ### User Data:
+// ${JSON.stringify(assessment)}
+// `;
 
-    const rawReply = (await askVertex(prompt)).trim()
-            console.log(rawReply);
+    // const rawReply = (await askVertex(prompt)).trim()
+    //         console.log(rawReply);
 
-            const match = rawReply.match(/```json\s*([\s\S]*?)```/) || rawReply.match(/\{[\s\S]*\}/);
+    //         const match = rawReply.match(/```json\s*([\s\S]*?)```/) || rawReply.match(/\{[\s\S]*\}/);
 
-            if (!match) {
-                throw new Error("No JSON found in CareerSathi response");
-            }
+    //         if (!match) {
+    //             throw new Error("No JSON found in CareerSathi response");
+    //         }
 
-            let reply;
-            reply = JSON.parse(match[1] ?? match[0]);
-            console.log(reply);
+    //         let reply;
+    //         reply = JSON.parse(match[1] ?? match[0]);
+    //         console.log(reply);
     return NextResponse.json({ 
       success: true, 
       assessmentId: assessment.id,
-      careerPaths: reply.careerPaths,
+      careerPaths: {},
       message: 'Assessment completed successfully' 
     })
 
