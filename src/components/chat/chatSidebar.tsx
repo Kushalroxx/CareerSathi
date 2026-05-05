@@ -21,7 +21,7 @@ export default function ChatSidebar({ darkMode, recentConversations, currentSess
         initial={{ x: -100 }}
         animate={{ x: 0 }}
         transition={{ duration: 0.6 ,delay: 0.3}}
-        className="absolute top-5 left-3 z-50 lg:hidden"
+        className="fixed top-5 left-3 z-50 lg:hidden"
         onClick={() => setSidebarOpen(true)}
       >
         <MessageCircle size={25} className="text-gray-700 dark:text-gray-200" />

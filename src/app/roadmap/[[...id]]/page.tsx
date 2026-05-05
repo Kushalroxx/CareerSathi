@@ -40,7 +40,6 @@ try {
       recommendedProjects: true
     }
   });
-  console.log(roadmap);
   
 
   if (!roadmap) {

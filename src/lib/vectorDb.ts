@@ -89,7 +89,7 @@ export class VectorDb {
         userId: string,
         queryVector: number[],
         chatId: string,
-        topK: number = 5
+        topK: number = 2
     ): Promise<QdrantSearchResult> {        
         
         const searchBody = {

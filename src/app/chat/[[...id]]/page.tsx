@@ -38,7 +38,7 @@ export default function ChatPage() {
       setCurrentSessionId(id);
     }
   }, [id]);
-
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
   const handleSend = async () => {
     if (!input.trim() || isTyping) return;
 
@@ -52,37 +52,95 @@ export default function ChatPage() {
     try {
       if (!userId) throw new Error("User not logged in");
       
-      // Create new session if needed
+      // 1. Create new session if needed (Same as your old code)
+      let isNewSession = false;
       if (!sessionId) {
         const generatedSessionId = await createChatSession(userId, "New Chat");
         setCurrentSessionId(generatedSessionId);
         sessionId = generatedSessionId;
         window.history.replaceState(null, "", `/chat/${generatedSessionId}`);
+        isNewSession = true;
       }
 
       await saveChatMessage(userId, sessionId, "user", userMessage.text);
 
-      const history = [...messages, userMessage].slice(-30).map((m) => ({ role: m.role, text: m.text }));
+      const history = messages.slice(-3).map((m) => ({ role: m.role, text: m.text }));
+      
+      // 2. Fetch from the new streaming API
       const res = await fetch("/api/careersathi", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMessage.text, provider: "gemini",chatId: sessionId, history }),
+        body: JSON.stringify({ message: userMessage.text, provider: "gemini", chatId: sessionId, history }),
       });
-      if (!res.ok) {
-        setInput(oldInput);
-      }
-      const data = await res.json();
-      if (data.title) {
-        const newTitle = data.title.substring(0, 40) + (data.title.length > 40 ? "..." : "");
-        document.title = data.title;
-        await updateChatSessionTitle(userId, sessionId, newTitle);
-      }
-      const botReply = data.reply || "Sorry, I encountered an error.";
-      const botMessage: ChatMessage = { role: "bot", text: botReply };
 
-      setMessages((prev) => [...prev, botMessage]);
-      await saveChatMessage(userId, sessionId, "bot", botReply);
+      if (!res.ok || !res.body) {
+        throw new Error("Failed to get response");
+      }
+
+      // 3. Prepare the UI for the typing effect
+      setMessages((prev) => [...prev, { role: "bot", text: "" }]);
+
+      // 4. Setup Stream Reader
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let completeBotReply = "";
+      let finalTitle = "";
+
+      // 5. Read the stream chunk-by-chunk
+      // 5. Read the stream chunk-by-chunk
+      setIsTyping(false);
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunkText = decoder.decode(value, { stream: true });
+        
+        // CLIENT-SIDE TYPING EFFECT: Split the chunk by spaces and newlines (keeping them)
+        const tokens = chunkText.split(/([ \n])/); 
+
+        for (const token of tokens) {
+          if (!token) continue;
+
+          completeBotReply += token;
+          let displayReply = completeBotReply;
+
+          // 6. Look for the hidden Title delimiter
+          if (completeBotReply.includes("__CHAT_TITLE__")) {
+            const parts = completeBotReply.split("__CHAT_TITLE__");
+            displayReply = parts[0]; 
+            finalTitle = parts[1];   
+          }
+
+          // 7. Update the UI in real-time
+          setMessages((prev) => {
+            const newMessages = [...prev];
+            newMessages[newMessages.length - 1] = { 
+              ...newMessages[newMessages.length - 1], 
+              text: displayReply 
+            };
+            return newMessages;
+          });
+
+          // The Client-Side Magic: Delay between each word
+          await sleep(20); // Adjust this number to make typing faster or slower!
+        }
+      }
+
+      // 8. Stream is completely finished. Clean up the final text.
+      const cleanBotReply = completeBotReply.split("__CHAT_TITLE__")[0];
+
+      // 9. Save Title to Firebase if we extracted one
+      if (finalTitle && isNewSession) {
+        const truncatedTitle = finalTitle.substring(0, 40) + (finalTitle.length > 40 ? "..." : "");
+        document.title = finalTitle;
+        await updateChatSessionTitle(userId, sessionId, truncatedTitle);
+      }
+
+      // 10. Save the final, clean Bot message to the database
+      await saveChatMessage(userId, sessionId, "bot", cleanBotReply);
+
     } catch (err) {
+      console.error("Chat error:", err);
       setInput(oldInput);
       setMessages((prev) => [...prev, { role: "bot", text: "Sorry, something went wrong." }]);
     } finally {
@@ -101,7 +159,7 @@ export default function ChatPage() {
           startNewChat={startNewChat}
         />
         <div className="flex flex-col flex-1 pt-16">
-          <motion.div className="flex-1 overflow-y-auto  rounded-2xl flex flex-col" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <motion.div className="flex-1 overflow-y-auto  rounded-2xl flex flex-col " initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <ChatWindow messages={messages} loading={loading} isTyping={isTyping} />
             
           </motion.div>
