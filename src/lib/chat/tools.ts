@@ -1,6 +1,7 @@
-import {
-    Tool,
-} from "@aws-sdk/client-bedrock-runtime";
+import { Tool, FunctionDeclarationSchemaType } from "@google-cloud/vertexai";
+
+// Alias it so the schema definitions below stay clean and readable
+const Type = FunctionDeclarationSchemaType;
 
 export const prompt = `
 You are CareerSathi, an expert, highly opinionated, and decisive career mentor. You do not give vague advice. You tell users exactly what they need to do to succeed in the their industry.
@@ -26,94 +27,83 @@ ROADMAP MANAGEMENT LOGIC (CRITICAL):
     4. IF they say yes, call 'get_roadmap_details' to see what they already know.
     5. Call 'update_roadmap' to overwrite it with harder concepts. Do not repeat basic skills they already have.
 `;
+
 export const careerSathiTools: Tool[] = [
-    {
-        toolSpec: {
-            name: "get_user_context",
-            description: "Fetches the user's career profile and active roadmaps (returns ID and career path). Call this immediately when the chat starts or if the user asks for advice.",
-            inputSchema: { json: { type: "object", properties: {} } }
+  {
+    functionDeclarations: [
+      {
+        name: "get_user_context",
+        description: "Fetches the user's career profile and active roadmaps (returns ID and career path). Call this immediately when the chat starts or if the user asks for advice.",
+        parameters: { type: Type.OBJECT, properties: {} }
+      },
+      {
+        name: "search_past_memory",
+        description: "Searches past chat history for context. Call this if the user refers to something discussed previously.",
+        parameters: { type: Type.OBJECT, properties: {} }
+      },
+      {
+        name: "get_roadmap_details",
+        description: "Fetches the exact skills and projects of a specific roadmap. Call this using the roadmapId BEFORE updating OR explaining it, so you know exactly what the user has already learned.",
+        parameters: {
+          type: Type.OBJECT,
+          properties: {
+            roadmapId: { type: Type.STRING, description: "The ID of the roadmap to inspect." }
+          },
+          required: ["roadmapId"]
         }
-    },
-    {
-        toolSpec: {
-            name: "search_past_memory",
-            description: "Searches past chat history for context. Call this if the user refers to something discussed previously.",
-            inputSchema: { json: { type: "object", properties: {} } }
-        }
-    },
-    {
-        toolSpec: {
-            name: "get_roadmap_details",
-            description: "Fetches the exact skills and projects of a specific roadmap. Call this using the roadmapId BEFORE updating OR explaining it, so you know exactly what the user has already learned.",
-            inputSchema: {
-                json: {
-                    type: "object",
-                    properties: {
-                        roadmapId: { type: "string", description: "The ID of the roadmap to inspect." }
-                    },
-                    required: ["roadmapId"]
+      },
+      {
+        name: "update_roadmap",
+        description: "Overwrites an existing roadmap with new, upgraded skills and projects. Call this ONLY after getting user confirmation.",
+        parameters: {
+          type: Type.OBJECT,
+          properties: {
+            roadmapId: { type: Type.STRING },
+            skillsToLearn: {
+              type: Type.ARRAY,
+              items: { type: Type.STRING },
+              description: "Format with Markdown headings and timelines (e.g., '### Advanced Hooks\\nEst: 1 week.')"
+            },
+            recommendedProjects: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  title: { type: Type.STRING },
+                  description: { type: Type.STRING, description: "Markdown explanation with timeline." }
                 }
+              }
             }
+          },
+          required: ["roadmapId", "skillsToLearn", "recommendedProjects"]
         }
-    },
-    {
-        toolSpec: {
-            name: "update_roadmap",
-            description: "Overwrites an existing roadmap with new, upgraded skills and projects (e.g., moving from beginner to advanced). Call this ONLY after getting user confirmation.",
-            inputSchema: {
-                json: {
-                    type: "object",
-                    properties: {
-                        roadmapId: { type: "string" },
-                        skillsToLearn: {
-                            type: "array",
-                            items: { type: "string" },
-                            description: "Format with Markdown headings and timelines (e.g., '### Advanced Hooks\\nEst: 1 week.')"
-                        },
-                        recommendedProjects: {
-                            type: "array",
-                            items: {
-                                type: "object",
-                                properties: {
-                                    title: { type: "string" },
-                                    description: { type: "string", description: "Markdown explanation with timeline." }
-                                }
-                            }
-                        }
-                    },
-                    required: ["roadmapId", "skillsToLearn", "recommendedProjects"]
+      },
+      {
+        name: "create_new_roadmap",
+        description: "Generates a brand new career roadmap. Call this if the user wants to learn a completely new path they don't already have.",
+        parameters: {
+          type: Type.OBJECT,
+          properties: {
+            careerPath: { type: Type.STRING },
+            skillsToLearn: {
+              type: Type.ARRAY,
+              items: { type: Type.STRING },
+              description: "Format with Markdown headings and timelines."
+            },
+            recommendedProjects: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  title: { type: Type.STRING },
+                  description: { type: Type.STRING }
                 }
+              }
             }
+          },
+          required: ["careerPath", "skillsToLearn", "recommendedProjects"]
         }
-    },
-    {
-        toolSpec: {
-            name: "create_new_roadmap",
-            description: "Generates a brand new career roadmap. Call this if the user wants to learn a completely new path they don't already have.",
-            inputSchema: {
-                json: {
-                    type: "object",
-                    properties: {
-                        careerPath: { type: "string" },
-                        skillsToLearn: {
-                            type: "array",
-                            items: { type: "string" },
-                            description: "Format with Markdown headings and timelines."
-                        },
-                        recommendedProjects: {
-                            type: "array",
-                            items: {
-                                type: "object",
-                                properties: {
-                                    title: { type: "string" },
-                                    description: { type: "string" }
-                                }
-                            }
-                        }
-                    },
-                    required: ["careerPath", "skillsToLearn", "recommendedProjects"]
-                }
-            }
-        }
-    }
+      }
+    ]
+  }
 ];

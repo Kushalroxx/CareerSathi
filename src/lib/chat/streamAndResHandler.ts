@@ -1,36 +1,51 @@
-import { BedrockRuntimeClient, ConverseCommand, ConverseStreamCommand } from "@aws-sdk/client-bedrock-runtime";
+import { VertexAI, Content } from "@google-cloud/vertexai";
 import { prisma } from "../prisma";
 import { VectorDb } from "../vectorDb";
 import { textEmbedding } from "../vertex";
 import { Session } from "next-auth";
 import { careerSathiTools, prompt } from "./tools";
 import { userProfileToString } from "../userProfileToString";
-import { NodeHttpHandler } from "@smithy/node-http-handler";
 
-const BEDROCK_MODEL_ID = "openai.gpt-oss-safeguard-120b";
-export const streamAndResHandler = async (message: string, history: any[], chatId: string, session: Session, controller: ReadableStreamDefaultController, encoder: TextEncoder) => {
-    const bedrockClient = new BedrockRuntimeClient({
-    region: process.env.AWS_REGION || "us-west-2",
-    maxAttempts: 3,
-        requestHandler: new NodeHttpHandler({
-            connectionTimeout: 10000, 
-            requestTimeout: 60000,    
-        }),
-});
+export const streamAndResHandler = async (
+    message: string, 
+    history: any[], 
+    chatId: string, 
+    session: Session, 
+    controller: ReadableStreamDefaultController, 
+    encoder: TextEncoder
+) => {
+    const vertex = new VertexAI({
+        project: process.env.GOOGLE_PROJECT_ID!,
+        // location: "us-central1",
+        googleAuthOptions: {
+            credentials: JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS || "{}")
+        },
+    });
+
     const systemPromptText = `
-    User Name: ${session.user.name}
-  ${prompt}
-  Recent Chat:
-  ${JSON.stringify(history.slice(-3).map((msg: any) => `${msg.role === "user" ? "User" : "CareerSathi"}: ${msg.text}`).join("\n"))}`;
+User Name: ${session.user.name}
+${prompt}
+Recent Chat:
+${JSON.stringify(history.slice(-3).map((msg: any) => `${msg.role === "user" ? "User" : "CareerSathi"}: ${msg.text}`).join("\n"))}`;
+
+    const model = vertex.getGenerativeModel({
+        model: "gemini-2.5-flash",
+        systemInstruction: { 
+            role: "system",
+            parts: [{ text: systemPromptText }] },
+        tools: careerSathiTools
+    });
 
     try {
         let completeResponseText = "";
         let newlyCreatedRoadmapUrl = "";
 
-        // Bedrock standard message format
-        const currentContents: any[] = [
-            { role: "user", content: [{ text: message }] }
-        ];
+        const currentContents: Content[] = history.map((msg) => ({
+            role: msg.role === "assistant" || msg.role === "model" ? "model" : "user",
+            parts: [{ text: msg.text }]
+        }));
+
+        currentContents.push({ role: "user", parts: [{ text: message }] });
 
         const streamOrHandleTools = async (depth = 0) => {
             if (depth > 5) {
@@ -41,53 +56,38 @@ export const streamAndResHandler = async (message: string, history: any[], chatI
                 return;
             }
 
-            const command = new ConverseStreamCommand({
-                modelId: BEDROCK_MODEL_ID,
-                system: [{ text: systemPromptText }],
-                messages: currentContents,
-                toolConfig: { tools: careerSathiTools }
+            const responseStream = await model.generateContentStream({
+                contents: currentContents,
             });
 
-            const response = await bedrockClient.send(command);
+            let functionCallName = "";
+            let functionCallArgs: any = null;
 
-            let toolUseId = "";
-            let toolName = "";
-            let toolInputAccumulator = "";
-
-            // Parse the Bedrock Stream
-            for await (const event of response.stream!) {
-                if (event.contentBlockDelta?.delta?.text) {
-                    completeResponseText += event.contentBlockDelta.delta.text;
-                    controller.enqueue(encoder.encode(event.contentBlockDelta.delta.text));
+            for await (const chunk of responseStream.stream) {
+                const part = chunk.candidates?.[0]?.content?.parts?.[0];
+                
+                if (part?.text) {
+                    completeResponseText += part.text;
+                    controller.enqueue(encoder.encode(part.text));
                 }
-                if (event.contentBlockStart?.start?.toolUse) {
-                    toolUseId = event.contentBlockStart.start.toolUse.toolUseId || "";
-                    toolName = event.contentBlockStart.start.toolUse.name || "";
-                }
-                if (event.contentBlockDelta?.delta?.toolUse?.input) {
-                    toolInputAccumulator += event.contentBlockDelta.delta.toolUse.input;
+                
+                if (part?.functionCall) {
+                    functionCallName = part.functionCall.name;
+                    functionCallArgs = part.functionCall.args;
                 }
             }
-
-            // If the LLM decided to use a tool during the stream
-            if (toolName) {
-                console.log(`[Tool Call - Depth ${depth}]:`, toolName);
-                
-                let args: any = {};
-                if (toolInputAccumulator) {
-                    try { args = JSON.parse(toolInputAccumulator); } catch (e) { console.error("Failed to parse tool args", e); }
-                }
-
-                // Append the AI's tool request to history so Bedrock maintains context
+            if (functionCallName) {
+                console.log(`[Tool Call - Depth ${depth}]:`, functionCallName);
                 currentContents.push({
-                    role: "assistant",
-                    content: [{ toolUse: { toolUseId, name: toolName, input: args } }]
+                    role: "model",
+                    parts: [{ functionCall: { name: functionCallName, args: functionCallArgs } }]
                 });
 
                 let toolResponseData: any = {};
+                const args = functionCallArgs || {};
 
                 try {
-                    if (toolName === "get_user_context") {
+                    if (functionCallName === "get_user_context") {
                         const [userProfile, activeRoadmaps] = await Promise.all([
                             prisma.userProfile.findUnique({ where: { userId: session.user.id } }),
                             prisma.roadmap.findMany({ where: { userId: session.user.id }, select: { id: true, careerPath: true } })
@@ -97,26 +97,26 @@ export const streamAndResHandler = async (message: string, history: any[], chatI
                             activeRoadmaps: activeRoadmaps
                         };
                     } 
-                    else if (toolName === "get_roadmap_details") {
+                    else if (functionCallName === "get_roadmap_details") {
                         const roadmapData = await prisma.roadmap.findUnique({
                             where: { id: args.roadmapId, userId: session.user.id },
                             include: { skillsToLearn: true, recommendedProjects: true }
                         });
                         toolResponseData = roadmapData ? roadmapData : { error: "Roadmap not found." };
                     }
-                    else if (toolName === "search_past_memory") {
+                    else if (functionCallName === "search_past_memory") {
                         const vectorDb = VectorDb.getInstance();
                         const embMessage = await textEmbedding(message);
                         const pastData = await vectorDb.getFromVectorDb(session.user.id, embMessage, chatId);
                         toolResponseData = { memory: pastData.map((e: any) => e.payload?.text_content).join("\n") };
                     } 
-                    else if (toolName === "create_new_roadmap") {
+                    else if (functionCallName === "create_new_roadmap") {
                         const newRoadmap = await prisma.roadmap.create({
                             data: {
                                 careerPath: args.careerPath,
-                                skillsToLearn: { create: args.skillsToLearn.map((skill: string) => ({ skill, done: false })) },
+                                skillsToLearn: { create: (args.skillsToLearn || []).map((skill: string) => ({ skill, done: false })) },
                                 recommendedProjects: {
-                                    create: args.recommendedProjects.map((project: any) => ({
+                                    create: (args.recommendedProjects || []).map((project: any) => ({
                                         title: project.title || "Untitled",
                                         description: project.description || "No description.",
                                     })),
@@ -127,17 +127,17 @@ export const streamAndResHandler = async (message: string, history: any[], chatI
                         newlyCreatedRoadmapUrl = `\n\nI've created a new roadmap for you! \n\n[View your ${args.careerPath} roadmap](/roadmap/${newRoadmap.id})`;
                         toolResponseData = { success: true, roadmapId: newRoadmap.id };
                     }
-                    else if (toolName === "update_roadmap") {
+                    else if (functionCallName === "update_roadmap") {
                         const updatedRoadmap = await prisma.roadmap.update({
                             where: { id: args.roadmapId, userId: session.user.id },
                             data: {
                                 skillsToLearn: { 
                                     deleteMany: {}, 
-                                    create: args.skillsToLearn.map((skill: string) => ({ skill, done: false })) 
+                                    create: (args.skillsToLearn || []).map((skill: string) => ({ skill, done: false })) 
                                 },
                                 recommendedProjects: {
                                     deleteMany: {}, 
-                                    create: args.recommendedProjects.map((project: any) => ({
+                                    create: (args.recommendedProjects || []).map((project: any) => ({
                                         title: project.title || "Untitled",
                                         description: project.description || "No description.",
                                     })),
@@ -148,16 +148,13 @@ export const streamAndResHandler = async (message: string, history: any[], chatI
                         toolResponseData = { success: true };
                     }
                 } catch (err) {
-                    console.error(`Tool execution failed for ${toolName}:`, err);
+                    console.error(`Tool execution failed for ${functionCallName}:`, err);
                     toolResponseData = { error: "Tool execution failed" };
                 }
-
-                // Feed the database result back to Bedrock so it can form a natural sentence
                 currentContents.push({
                     role: "user",
-                    content: [{ toolResult: { toolUseId, content: [{ json: toolResponseData }] } }]
+                    parts: [{ functionResponse: { name: functionCallName, response: toolResponseData } }]
                 });
-
                 await streamOrHandleTools(depth + 1);
             }
         };
@@ -168,37 +165,31 @@ export const streamAndResHandler = async (message: string, history: any[], chatI
             completeResponseText += newlyCreatedRoadmapUrl;
             controller.enqueue(encoder.encode(newlyCreatedRoadmapUrl));
         }
-
-        // Title Generation using Bedrock
         if (history.length <= 1) {
             try {
-                const titleCommand = new ConverseCommand({
-                    modelId: BEDROCK_MODEL_ID,
-                    messages: [{ role: "user", content: [{ text: `Summarize this message into a highly concise 3-5 word title: "${message}"` }] }]
-                });
-                const titleRes = await bedrockClient.send(titleCommand);
-                const generatedTitle = titleRes.output?.message?.content?.[0]?.text || "New Career Chat";
-                
+                const titleRes = await model.generateContent(`Summarize this message into a highly concise 3-5 word title: "${message}"`);
+                const generatedTitle = titleRes.response.candidates?.[0]?.content?.parts?.[0]?.text || "New Career Chat";
                 controller.enqueue(encoder.encode(`__CHAT_TITLE__${generatedTitle.trim().replace(/["*]/g, '')}`));
             } catch (err) {
                 controller.enqueue(encoder.encode(`__CHAT_TITLE__New Career Chat`));
             }
         }
 
-        controller.close();
-
-        // Save embeddings asynchronously 
-        if (message.split(" ").length > 5) {
-            Promise.resolve().then(async () => {
-                try {
-                    const vectorDb = VectorDb.getInstance();
-                    const embMsg = await textEmbedding(message);
-                    const embReply = await textEmbedding(completeResponseText.split("__CHAT_TITLE__")[0]);
-                    await vectorDb.saveToVectorDb(session.user.id, embMsg, `User: ${message}`, chatId);
-                    await vectorDb.saveToVectorDb(session.user.id, embReply, `CareerSathi: ${completeResponseText.split("__CHAT_TITLE__")[0]}`, chatId);
-                } catch (err) {}
-            });
+        if (message.split(" ").length > 2) { 
+            try {
+                const vectorDb = VectorDb.getInstance();
+                const cleanReplyText = completeResponseText.split("__CHAT_TITLE__")[0];
+                const [embMsg, embReply] = await Promise.all([
+                    textEmbedding(message),
+                    textEmbedding(cleanReplyText)
+                ]);
+                await vectorDb.saveToVectorDb(session.user.id, embMsg, `User: ${message}`, chatId);
+                await vectorDb.saveToVectorDb(session.user.id, embReply, `CareerSathi: ${cleanReplyText}`, chatId);
+            } catch (err) {
+                console.error("Vector DB save failed:", err);
+            }
         }
+        controller.close();
 
     } catch (err) {
         console.error("Streaming error:", err);
